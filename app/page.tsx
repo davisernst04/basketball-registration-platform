@@ -10,8 +10,8 @@ export default function Home() {
 
   return (
     <main className="bg-black">
-      <header className="border-b border-red-900/30 bg-black/70 backdrop-blur-sm fixed top-0 left-0 right-0 z-20">
-        <div className="mx-auto px-4 md:px-16 py-3 flex justify-between items-center">
+      <header className="border-b border-red-900/30 bg-black/70 backdrop-blur-sm fixed top-0 left-0 right-0 z-20 h-16 md:h-20">
+        <div className="h-full mx-auto px-4 md:px-16 flex justify-between items-center">
           <Image
             src="/logo.jpg"
             alt="Shadow Basketball Logo"
@@ -40,7 +40,7 @@ export default function Home() {
         </div>
       </header>
 
-      <section className="min-h-screen flex flex-col md:grid md:grid-cols-2 relative pt-16 md:pt-0">
+      <section className="min-h-screen flex flex-col md:grid md:grid-cols-2 relative pt-16 md:pt-20">
         <div className="flex flex-col justify-center items-start px-6 md:px-16 py-4 md:py-32 bg-gradient-to-b md:bg-gradient-to-r from-black via-black/95 to-black/80 relative z-10 order-2 md:order-1">
           <h1 className="font-impact text-6xl md:text-8xl lg:text-9xl text-white leading-none tracking-tight">
             SHADOW
