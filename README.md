@@ -1,36 +1,144 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Shadow Basketball - Tryout Registration Platform
+
+A youth basketball team registration platform for Shadow Basketball, featuring a red and black themed design. This application allows parents to register their children for tryouts and provides coaches with administrative tools to manage tryout sessions and view registrations.
+
+## Features
+
+### For Parents
+- **Beautiful Landing Page**: Shadow Basketball branded landing page with team colors (red and black)
+- **Tryout Schedule**: View all available tryout sessions with dates, times, and locations
+- **Easy Registration**: Simple form to register children for tryouts including:
+  - Parent/guardian information
+  - Player information (name, age, grade)
+  - Medical information
+  - Emergency contact details
+  - Tryout session selection
+
+### For Coaches (Admin)
+- **Admin Dashboard**: Comprehensive dashboard to manage all aspects of tryouts
+- **View Registrations**: See all player registrations with complete details
+- **Manage Tryout Sessions**: View all scheduled tryout sessions with registration counts
+- **Create New Tryouts**: Add new tryout sessions with:
+  - Age group categorization
+  - Date and time slots
+  - Location details
+  - Maximum capacity limits
+  - Additional notes
+- **Search Functionality**: Filter registrations by player or parent name/email
+
+## Tech Stack
+
+- **Frontend**: Next.js 16 with React 19
+- **UI Components**: shadcn/ui with Tailwind CSS 4
+- **Database**: PostgreSQL with Prisma ORM
+- **Authentication**: Better Auth
+- **Theme**: Custom red and black color scheme
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+- Node.js (v20 or higher)
+- PostgreSQL database
+- npm or yarn
 
+### Installation
+
+1. Clone the repository
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone <repository-url>
+cd basketball-registration-platform
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Install dependencies
+```bash
+npm install
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+3. Set up environment variables
+Create a `.env` file in the root directory:
+```
+DATABASE_URL="your-postgresql-connection-string"
+BETTER_AUTH_SECRET="your-secret-key"
+BETTER_AUTH_URL="http://localhost:3000"
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+4. Push the database schema
+```bash
+npx prisma db push
+```
 
-## Learn More
+5. Seed the database with sample tryout sessions
+```bash
+npx tsx prisma/seed.ts
+```
 
-To learn more about Next.js, take a look at the following resources:
+6. Run the development server
+```bash
+npm run dev
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+7. Open [http://localhost:3000](http://localhost:3000) in your browser
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Pages
 
-## Deploy on Vercel
+- **/** - Landing page with team branding and quick access
+- **/register** - Registration form for parents
+- **/tryouts** - Public tryout schedule
+- **/dashboard** - Admin dashboard for coaches
+- **/sign-in** - Authentication for coaches
+- **/sign-up** - Registration for coach accounts
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Database Schema
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### User
+- Authentication and user management
+- Role-based access (parent/coach)
+
+### Tryout
+- Tryout session information
+- Location, date, time details
+- Age group categorization
+- Capacity management
+
+### Registration
+- Player registration data
+- Parent contact information
+- Medical and emergency contact details
+- Links to specific tryout sessions
+
+## Customization
+
+### Theme Colors
+The application uses a red and black color scheme matching Shadow Basketball's branding. Colors are defined in `app/globals.css` using CSS custom properties.
+
+### Team Branding
+Update the team name and branding in:
+- `app/page.tsx` - Landing page
+- `app/layout.tsx` - Page metadata
+- Headers across all pages
+
+## Development
+
+### Build for Production
+```bash
+npm run build
+npm start
+```
+
+### Run Database Migrations
+```bash
+npx prisma migrate dev
+```
+
+### Generate Prisma Client
+```bash
+npx prisma generate
+```
+
+## Support
+
+For issues or questions, please contact the Shadow Basketball administration.
+
+---
+
+**Shadow Basketball** - *Rise From The Shadows*

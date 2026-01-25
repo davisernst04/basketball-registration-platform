@@ -1,10 +1,10 @@
-datasource db {
-  provider = "postgresql"
-}
-
 generator client {
   provider = "prisma-client"
   output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
 }
 
 model User {
@@ -15,8 +15,10 @@ model User {
   image         String?
   createdAt     DateTime
   updatedAt     DateTime
+  role          String    @default("parent")
   sessions      Session[]
   accounts      Account[]
+  registrations Registration[]
 
   @@unique([email])
   @@map("user")
@@ -68,4 +70,43 @@ model Verification {
 
   @@index([identifier])
   @@map("verification")
+}
+
+model Tryout {
+  id            String         @id @default(uuid())
+  location      String
+  date          DateTime
+  startTime     String
+  endTime       String
+  ageGroup      String
+  maxCapacity   Int?
+  notes         String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  registrations Registration[]
+
+  @@map("tryout")
+}
+
+model Registration {
+  id              String   @id @default(uuid())
+  parentName      String
+  parentEmail     String
+  parentPhone     String
+  playerName      String
+  playerAge       Int
+  playerGrade     String
+  medicalInfo     String?
+  emergencyContact String
+  emergencyPhone  String
+  tryoutId        String
+  tryout          Tryout   @relation(fields: [tryoutId], references: [id], onDelete: Cascade)
+  userId          String?
+  user            User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([tryoutId])
+  @@index([userId])
+  @@map("registration")
 }
