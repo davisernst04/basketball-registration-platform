@@ -30,13 +30,6 @@ export default function Home() {
             >
               Sign In
             </Button>
-            <Button
-              onClick={() => router.push("/sign-up")}
-              size="sm"
-              className="bg-red-600 text-white hover:bg-red-700 text-sm md:text-base px-4 md:px-6"
-            >
-              Sign Up
-            </Button>
           </div>
         </div>
       </header>
