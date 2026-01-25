@@ -3,7 +3,13 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
@@ -47,9 +53,12 @@ export default function DashboardPage() {
   const [registrations, setRegistrations] = useState<Registration[]>([]);
   const [tryouts, setTryouts] = useState<Tryout[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<"registrations" | "tryouts" | "create">("registrations");
+  const [activeTab, setActiveTab] = useState<
+    "registrations" | "tryouts" | "create"
+  >("registrations");
   const [searchTerm, setSearchTerm] = useState("");
   const [message, setMessage] = useState("");
+  const [editingTryout, setEditingTryout] = useState<Tryout | null>(null);
 
   const [newTryout, setNewTryout] = useState({
     location: "",
@@ -72,12 +81,12 @@ export default function DashboardPage() {
         fetch("/api/registrations"),
         fetch("/api/tryouts"),
       ]);
-      
+
       if (regRes.ok) {
         const regData = await regRes.json();
         setRegistrations(regData);
       }
-      
+
       if (tryRes.ok) {
         const tryData = await tryRes.json();
         setTryouts(tryData);
@@ -99,7 +108,9 @@ export default function DashboardPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...newTryout,
-          maxCapacity: newTryout.maxCapacity ? parseInt(newTryout.maxCapacity) : null,
+          maxCapacity: newTryout.maxCapacity
+            ? parseInt(newTryout.maxCapacity)
+            : null,
           date: new Date(newTryout.date).toISOString(),
         }),
       });
@@ -125,10 +136,108 @@ export default function DashboardPage() {
     }
   };
 
-  const filteredRegistrations = registrations.filter((reg) =>
-    reg.playerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    reg.parentName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    reg.parentEmail.toLowerCase().includes(searchTerm.toLowerCase())
+  const handleUpdateTryout = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingTryout) return;
+
+    setMessage("");
+
+    try {
+      const response = await fetch("/api/tryouts", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: editingTryout.id,
+          ...newTryout,
+          maxCapacity: newTryout.maxCapacity
+            ? parseInt(newTryout.maxCapacity)
+            : null,
+          date: new Date(newTryout.date).toISOString(),
+        }),
+      });
+
+      if (response.ok) {
+        setMessage("Tryout session updated successfully!");
+        setEditingTryout(null);
+        setNewTryout({
+          location: "",
+          date: "",
+          startTime: "",
+          endTime: "",
+          ageGroup: "",
+          maxCapacity: "",
+          notes: "",
+        });
+        loadData();
+        setTimeout(() => setActiveTab("tryouts"), 1500);
+      } else {
+        setMessage("Failed to update tryout session");
+      }
+    } catch (error) {
+      console.error("Error updating tryout:", error);
+      setMessage("Error updating tryout session");
+    }
+  };
+
+  const handleDeleteTryout = async (id: string) => {
+    if (
+      !confirm(
+        "Are you sure you want to delete this tryout session? This cannot be undone.",
+      )
+    ) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/tryouts?id=${id}`, {
+        method: "DELETE",
+      });
+
+      if (response.ok) {
+        setMessage("Tryout session deleted successfully!");
+        loadData();
+        setTimeout(() => setMessage(""), 3000);
+      } else {
+        setMessage("Failed to delete tryout session");
+      }
+    } catch (error) {
+      console.error("Error deleting tryout:", error);
+      setMessage("Error deleting tryout session");
+    }
+  };
+
+  const startEditingTryout = (tryout: Tryout) => {
+    setEditingTryout(tryout);
+    setNewTryout({
+      location: tryout.location,
+      date: new Date(tryout.date).toISOString().split("T")[0],
+      startTime: tryout.startTime,
+      endTime: tryout.endTime,
+      ageGroup: tryout.ageGroup,
+      maxCapacity: tryout.maxCapacity?.toString() || "",
+      notes: tryout.notes || "",
+    });
+    setActiveTab("create");
+  };
+
+  const cancelEditing = () => {
+    setEditingTryout(null);
+    setNewTryout({
+      location: "",
+      date: "",
+      startTime: "",
+      endTime: "",
+      ageGroup: "",
+      maxCapacity: "",
+      notes: "",
+    });
+  };
+
+  const filteredRegistrations = registrations.filter(
+    (reg) =>
+      reg.playerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      reg.parentName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      reg.parentEmail.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   return (
@@ -136,7 +245,9 @@ export default function DashboardPage() {
       {/* Header */}
       <header className="border-b border-red-900/30 bg-black/40 backdrop-blur-sm">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-white">Shadow Basketball - Admin</h1>
+          <h1 className="text-2xl font-bold text-white">
+            Shadow Basketball - Admin
+          </h1>
           <Button
             onClick={() => router.push("/")}
             variant="outline"
@@ -186,7 +297,9 @@ export default function DashboardPage() {
         {activeTab === "registrations" && (
           <div className="space-y-6">
             <div className="flex justify-between items-center">
-              <h2 className="text-2xl font-bold text-white">All Registrations</h2>
+              <h2 className="text-2xl font-bold text-white">
+                All Registrations
+              </h2>
               <Input
                 placeholder="Search by player or parent name, email..."
                 value={searchTerm}
@@ -210,31 +323,46 @@ export default function DashboardPage() {
                     <CardHeader>
                       <div className="flex justify-between items-start">
                         <div>
-                          <CardTitle className="text-xl text-white">{reg.playerName}</CardTitle>
+                          <CardTitle className="text-xl text-white">
+                            {reg.playerName}
+                          </CardTitle>
                           <CardDescription className="text-gray-400">
                             {reg.playerAge} years old • {reg.playerGrade}
                           </CardDescription>
                         </div>
                         <div className="text-sm text-gray-400">
-                          Registered: {new Date(reg.createdAt).toLocaleDateString()}
+                          Registered:{" "}
+                          {new Date(reg.createdAt).toLocaleDateString()}
                         </div>
                       </div>
                     </CardHeader>
                     <CardContent>
                       <div className="grid md:grid-cols-2 gap-4">
                         <div className="space-y-2">
-                          <h4 className="text-sm font-semibold text-red-500">Parent/Guardian</h4>
+                          <h4 className="text-sm font-semibold text-red-500">
+                            Parent/Guardian
+                          </h4>
                           <p className="text-white">{reg.parentName}</p>
-                          <p className="text-gray-400 text-sm">{reg.parentEmail}</p>
-                          <p className="text-gray-400 text-sm">{reg.parentPhone}</p>
+                          <p className="text-gray-400 text-sm">
+                            {reg.parentEmail}
+                          </p>
+                          <p className="text-gray-400 text-sm">
+                            {reg.parentPhone}
+                          </p>
                         </div>
                         <div className="space-y-2">
-                          <h4 className="text-sm font-semibold text-red-500">Emergency Contact</h4>
+                          <h4 className="text-sm font-semibold text-red-500">
+                            Emergency Contact
+                          </h4>
                           <p className="text-white">{reg.emergencyContact}</p>
-                          <p className="text-gray-400 text-sm">{reg.emergencyPhone}</p>
+                          <p className="text-gray-400 text-sm">
+                            {reg.emergencyPhone}
+                          </p>
                         </div>
                         <div className="space-y-2">
-                          <h4 className="text-sm font-semibold text-red-500">Tryout Session</h4>
+                          <h4 className="text-sm font-semibold text-red-500">
+                            Tryout Session
+                          </h4>
                           <p className="text-white">{reg.tryout.ageGroup}</p>
                           <p className="text-gray-400 text-sm">
                             {new Date(reg.tryout.date).toLocaleDateString()}
@@ -242,12 +370,18 @@ export default function DashboardPage() {
                           <p className="text-gray-400 text-sm">
                             {reg.tryout.startTime} - {reg.tryout.endTime}
                           </p>
-                          <p className="text-gray-400 text-sm">{reg.tryout.location}</p>
+                          <p className="text-gray-400 text-sm">
+                            {reg.tryout.location}
+                          </p>
                         </div>
                         {reg.medicalInfo && (
                           <div className="space-y-2">
-                            <h4 className="text-sm font-semibold text-red-500">Medical Info</h4>
-                            <p className="text-gray-400 text-sm">{reg.medicalInfo}</p>
+                            <h4 className="text-sm font-semibold text-red-500">
+                              Medical Info
+                            </h4>
+                            <p className="text-gray-400 text-sm">
+                              {reg.medicalInfo}
+                            </p>
                           </div>
                         )}
                       </div>
@@ -269,17 +403,24 @@ export default function DashboardPage() {
             ) : tryouts.length === 0 ? (
               <Card className="bg-black/60 border-red-900/30">
                 <CardContent className="py-12 text-center">
-                  <p className="text-gray-400">No tryout sessions created yet.</p>
+                  <p className="text-gray-400">
+                    No tryout sessions created yet.
+                  </p>
                 </CardContent>
               </Card>
             ) : (
               <div className="grid gap-4">
                 {tryouts.map((tryout) => (
-                  <Card key={tryout.id} className="bg-black/60 border-red-900/30">
+                  <Card
+                    key={tryout.id}
+                    className="bg-black/60 border-red-900/30"
+                  >
                     <CardHeader>
                       <div className="flex justify-between items-start">
                         <div>
-                          <CardTitle className="text-xl text-white">{tryout.ageGroup}</CardTitle>
+                          <CardTitle className="text-xl text-white">
+                            {tryout.ageGroup}
+                          </CardTitle>
                           <CardDescription className="text-gray-400">
                             {new Date(tryout.date).toLocaleDateString("en-US", {
                               weekday: "long",
@@ -294,23 +435,43 @@ export default function DashboardPage() {
                           <p className="text-2xl font-bold text-red-500">
                             {tryout._count.registrations}
                             {tryout.maxCapacity && (
-                              <span className="text-lg text-gray-400">/{tryout.maxCapacity}</span>
+                              <span className="text-lg text-gray-400">
+                                /{tryout.maxCapacity}
+                              </span>
                             )}
                           </p>
                         </div>
                       </div>
                     </CardHeader>
                     <CardContent>
-                      <div className="space-y-2">
+                      <div className="space-y-3">
                         <p className="text-white">
-                          ⏰ {tryout.startTime} - {tryout.endTime}
+                          {tryout.startTime} - {tryout.endTime}
                         </p>
-                        <p className="text-white">📍 {tryout.location}</p>
+                        <p className="text-white">@ {tryout.location}</p>
                         {tryout.notes && (
                           <p className="text-gray-400 text-sm mt-3 pt-3 border-t border-red-900/30">
                             {tryout.notes}
                           </p>
                         )}
+                        <div className="flex gap-2 mt-4 pt-4 border-t border-red-900/30">
+                          <Button
+                            onClick={() => startEditingTryout(tryout)}
+                            variant="outline"
+                            size="sm"
+                            className="flex-1 border-red-600 text-red-500 hover:bg-red-950 hover:text-red-400"
+                          >
+                            Edit
+                          </Button>
+                          <Button
+                            onClick={() => handleDeleteTryout(tryout.id)}
+                            variant="outline"
+                            size="sm"
+                            className="flex-1 border-red-900 text-red-400 hover:bg-red-950 hover:text-white"
+                          >
+                            Delete
+                          </Button>
+                        </div>
                       </div>
                     </CardContent>
                   </Card>
@@ -320,118 +481,177 @@ export default function DashboardPage() {
           </div>
         )}
 
-        {/* Create Tryout Tab */}
+        {/* Create/Edit Tryout Tab */}
         {activeTab === "create" && (
           <Card className="max-w-2xl mx-auto bg-black/60 border-red-900/30">
             <CardHeader>
-              <CardTitle className="text-2xl text-white">Create New Tryout Session</CardTitle>
+              <CardTitle className="text-2xl text-white">
+                {editingTryout
+                  ? "Edit Tryout Session"
+                  : "Create New Tryout Session"}
+              </CardTitle>
               <CardDescription className="text-gray-400">
-                Add a new tryout session for players to register
+                {editingTryout
+                  ? "Update the tryout session details"
+                  : "Add a new tryout session for players to register"}
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <form onSubmit={handleCreateTryout} className="space-y-4">
+              <form
+                onSubmit={
+                  editingTryout ? handleUpdateTryout : handleCreateTryout
+                }
+                className="space-y-4"
+              >
                 <div className="space-y-2">
-                  <Label htmlFor="ageGroup" className="text-white">Age Group *</Label>
+                  <Label htmlFor="ageGroup" className="text-white">
+                    Age Group *
+                  </Label>
                   <Input
                     id="ageGroup"
                     required
                     placeholder="e.g., Ages 10-12, U14, High School"
                     value={newTryout.ageGroup}
-                    onChange={(e) => setNewTryout({ ...newTryout, ageGroup: e.target.value })}
+                    onChange={(e) =>
+                      setNewTryout({ ...newTryout, ageGroup: e.target.value })
+                    }
                     className="bg-black/40 border-red-900/30 text-white"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="date" className="text-white">Date *</Label>
+                  <Label htmlFor="date" className="text-white">
+                    Date *
+                  </Label>
                   <Input
                     id="date"
                     type="date"
                     required
                     value={newTryout.date}
-                    onChange={(e) => setNewTryout({ ...newTryout, date: e.target.value })}
+                    onChange={(e) =>
+                      setNewTryout({ ...newTryout, date: e.target.value })
+                    }
                     className="bg-black/40 border-red-900/30 text-white"
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="startTime" className="text-white">Start Time *</Label>
+                    <Label htmlFor="startTime" className="text-white">
+                      Start Time *
+                    </Label>
                     <Input
                       id="startTime"
                       type="time"
                       required
                       value={newTryout.startTime}
-                      onChange={(e) => setNewTryout({ ...newTryout, startTime: e.target.value })}
+                      onChange={(e) =>
+                        setNewTryout({
+                          ...newTryout,
+                          startTime: e.target.value,
+                        })
+                      }
                       className="bg-black/40 border-red-900/30 text-white"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="endTime" className="text-white">End Time *</Label>
+                    <Label htmlFor="endTime" className="text-white">
+                      End Time *
+                    </Label>
                     <Input
                       id="endTime"
                       type="time"
                       required
                       value={newTryout.endTime}
-                      onChange={(e) => setNewTryout({ ...newTryout, endTime: e.target.value })}
+                      onChange={(e) =>
+                        setNewTryout({ ...newTryout, endTime: e.target.value })
+                      }
                       className="bg-black/40 border-red-900/30 text-white"
                     />
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="location" className="text-white">Location *</Label>
+                  <Label htmlFor="location" className="text-white">
+                    Location *
+                  </Label>
                   <Input
                     id="location"
                     required
                     placeholder="e.g., Shadow Basketball Center, 123 Main St"
                     value={newTryout.location}
-                    onChange={(e) => setNewTryout({ ...newTryout, location: e.target.value })}
+                    onChange={(e) =>
+                      setNewTryout({ ...newTryout, location: e.target.value })
+                    }
                     className="bg-black/40 border-red-900/30 text-white"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="maxCapacity" className="text-white">Max Capacity (Optional)</Label>
+                  <Label htmlFor="maxCapacity" className="text-white">
+                    Max Capacity (Optional)
+                  </Label>
                   <Input
                     id="maxCapacity"
                     type="number"
                     min="1"
                     placeholder="Leave blank for unlimited"
                     value={newTryout.maxCapacity}
-                    onChange={(e) => setNewTryout({ ...newTryout, maxCapacity: e.target.value })}
+                    onChange={(e) =>
+                      setNewTryout({
+                        ...newTryout,
+                        maxCapacity: e.target.value,
+                      })
+                    }
                     className="bg-black/40 border-red-900/30 text-white"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="notes" className="text-white">Notes (Optional)</Label>
+                  <Label htmlFor="notes" className="text-white">
+                    Notes (Optional)
+                  </Label>
                   <Input
                     id="notes"
                     placeholder="Any additional information for parents"
                     value={newTryout.notes}
-                    onChange={(e) => setNewTryout({ ...newTryout, notes: e.target.value })}
+                    onChange={(e) =>
+                      setNewTryout({ ...newTryout, notes: e.target.value })
+                    }
                     className="bg-black/40 border-red-900/30 text-white"
                   />
                 </div>
 
                 {message && (
-                  <div className={`p-4 rounded-lg ${
-                    message.includes("success")
-                      ? "bg-green-900/30 border border-green-700 text-green-400"
-                      : "bg-red-900/30 border border-red-700 text-red-400"
-                  }`}>
+                  <div
+                    className={`p-4 rounded-lg ${
+                      message.includes("success")
+                        ? "bg-green-900/30 border border-green-700 text-green-400"
+                        : "bg-red-900/30 border border-red-700 text-red-400"
+                    }`}
+                  >
                     {message}
                   </div>
                 )}
 
-                <Button
-                  type="submit"
-                  className="w-full bg-red-600 hover:bg-red-700 text-white"
-                >
-                  Create Tryout Session
-                </Button>
+                <div className="flex gap-3">
+                  <Button
+                    type="submit"
+                    className="flex-1 bg-red-600 hover:bg-red-700 text-white"
+                  >
+                    {editingTryout ? "Update Tryout" : "Create Tryout Session"}
+                  </Button>
+                  {editingTryout && (
+                    <Button
+                      type="button"
+                      onClick={cancelEditing}
+                      variant="outline"
+                      className="flex-1 border-red-600 text-red-500 hover:bg-red-950"
+                    >
+                      Cancel
+                    </Button>
+                  )}
+                </div>
               </form>
             </CardContent>
           </Card>
@@ -440,4 +660,3 @@ export default function DashboardPage() {
     </div>
   );
 }
-

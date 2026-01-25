@@ -17,7 +17,8 @@ export default function Home() {
             alt="Shadow Basketball Logo"
             width={80}
             height={0}
-            className="object-contain md:w-[100px]"
+            className="object-contain md:w-[100px] cursor-pointer"
+            onClick={() => router.push("/")}
           />
 
           <div className="flex gap-2 md:gap-3">
@@ -69,6 +70,15 @@ export default function Home() {
         <div className="relative h-[70vh] md:h-screen order-1 md:order-2">
           <HeroSlideshow />
           <div className="absolute inset-0 bg-gradient-to-b md:bg-gradient-to-l from-black/80 via-black/40 md:from-transparent md:via-black/20 to-transparent md:to-black pointer-events-none"></div>
+        </div>
+      </section>
+
+      {/* About Us Section */}
+      <section className="container mx-auto px-6 md:px-16 ">
+        <div className="max-w-5xl ">
+          <h2 className="font-impact text-5xl md:text-7xl text-white mb-8 text-center">
+            ABOUT SHADOW BASKETBALL
+          </h2>
         </div>
       </section>
 
