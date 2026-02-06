@@ -2,34 +2,42 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { signUp } from "@/lib/auth-client";
+import { createClient } from "@/utils/supabase/client";
 
 export default function SignUpPage() {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
+  const supabase = createClient();
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError(null);
 
     const formData = new FormData(e.currentTarget);
+    const name = formData.get("name") as string;
+    const email = formData.get("email") as string;
+    const password = formData.get("password") as string;
 
-    const res = await signUp.email({
-      name: formData.get("name") as string,
-      email: formData.get("email") as string,
-      password: formData.get("password") as string,
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          name: name,
+        },
+      },
     });
 
-    if (res.error) {
-      setError(res.error.message || "Something went wrong.");
+    if (error) {
+      setError(error.message || "Something went wrong.");
     } else {
       router.push("/dashboard");
+      router.refresh();
     }
   }
 
   return (
-    <main className="max-w-md mx-auto p-6 space-y-4 text-white">
-      {/* 
+    <main className="max-w-md h-screen flex items-center justify-center flex-col mx-auto p-6 space-y-4 text-white">
       <h1 className="text-2xl font-bold">Sign Up</h1>
 
       {error && <p className="text-red-500">{error}</p>}
@@ -63,7 +71,6 @@ export default function SignUpPage() {
           Create Account
         </button>
       </form>
-*/}
     </main>
   );
 }

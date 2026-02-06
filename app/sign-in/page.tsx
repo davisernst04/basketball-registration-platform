@@ -2,27 +2,31 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { signIn } from "@/lib/auth-client";
+import { createClient } from "@/utils/supabase/client";
 
 export default function SignInPage() {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
+  const supabase = createClient();
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError(null);
 
     const formData = new FormData(e.currentTarget);
+    const email = formData.get("email") as string;
+    const password = formData.get("password") as string;
 
-    const res = await signIn.email({
-      email: formData.get("email") as string,
-      password: formData.get("password") as string,
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
     });
 
-    if (res.error) {
-      setError(res.error.message || "Something went wrong.");
+    if (error) {
+      setError(error.message || "Something went wrong.");
     } else {
       router.push("/dashboard");
+      router.refresh();
     }
   }
 
