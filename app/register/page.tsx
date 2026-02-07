@@ -12,6 +12,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import Navbar from "@/components/Navbar";
+import { createClient } from "@/utils/supabase/client";
+import { motion, AnimatePresence } from "framer-motion";
+import { toast } from "sonner";
+import { Toaster } from "@/components/ui/sonner";
+import { CheckCircle2, AlertCircle, Loader2, ClipboardCheck, User, ShieldCheck, Zap } from "lucide-react";
 
 interface Tryout {
   id: string;
@@ -24,12 +30,32 @@ interface Tryout {
   notes: string | null;
 }
 
+const fadeInUp = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { 
+    opacity: 1, 
+    y: 0,
+    transition: { duration: 0.5, ease: "easeOut" as const }
+  }
+};
+
+const staggerContainer = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1
+    }
+  }
+};
+
 export default function RegisterPage() {
   const router = useRouter();
+  const supabase = createClient();
   const [tryouts, setTryouts] = useState<Tryout[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-  const [message, setMessage] = useState("");
+  const [user, setUser] = useState<any>(null);
 
   const [formData, setFormData] = useState({
     parentName: "",
@@ -45,22 +71,34 @@ export default function RegisterPage() {
   });
 
   useEffect(() => {
-    fetch("/api/tryouts")
-      .then((res) => res.json())
-      .then((data) => {
+    const fetchData = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        setUser(user);
+        setFormData(prev => ({
+          ...prev,
+          parentName: user.user_metadata?.full_name || "",
+          parentEmail: user.email || "",
+        }));
+      }
+
+      try {
+        const res = await fetch("/api/tryouts");
+        const data = await res.json();
         setTryouts(Array.isArray(data) ? data : []);
+      } catch (error) {
+        console.error("Error fetching tryouts:", error);
+      } finally {
         setLoading(false);
-      })
-      .catch(() => {
-        setTryouts([]);
-        setLoading(false);
-      });
-  }, []);
+      }
+    };
+
+    fetchData();
+  }, [supabase]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
-    setMessage("");
 
     try {
       const response = await fetch("/api/registrations", {
@@ -73,334 +111,311 @@ export default function RegisterPage() {
       });
 
       if (response.ok) {
-        setMessage(
-          "Registration successful! We'll contact you with more details.",
-        );
-        setFormData({
-          parentName: "",
-          parentEmail: "",
-          parentPhone: "",
-          playerName: "",
-          playerAge: "",
-          playerGrade: "",
-          medicalInfo: "",
-          emergencyContact: "",
-          emergencyPhone: "",
-          tryoutId: "",
+        toast.success("Registration successful!", {
+          description: "We've received your application. Redirecting...",
+          icon: <CheckCircle2 className="text-green-500" />
         });
+        
+        // Redirect to parent dashboard if logged in
+        if (user) {
+          setTimeout(() => router.push("/parent-dashboard"), 2000);
+        } else {
+          router.push("/");
+        }
       } else {
         const error = await response.json();
-        setMessage(error.error || "Registration failed. Please try again.");
+        toast.error("Registration failed", {
+          description: error.error || "Please check your information and try again.",
+          icon: <AlertCircle className="text-red-500" />
+        });
       }
     } catch (error) {
-      setMessage("An error occurred. Please try again.");
+      toast.error("An unexpected error occurred");
     } finally {
       setSubmitting(false);
     }
   };
 
   return (
-    <div className="min-h-screen">
-      {/* Header */}
-      <header className="border-b border-red-900/30 bg-black/40 backdrop-blur-sm">
-        <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <h1
-            className="text-2xl font-bold text-white cursor-pointer"
-            onClick={() => router.push("/")}
-          >
-            Shadow Basketball
-          </h1>
-          <Button
-            onClick={() => router.push("/")}
-            variant="outline"
-            className="border-red-600 text-red-500 hover:bg-red-950 hover:text-red-400"
-          >
-            Back to Home
-          </Button>
-        </div>
-      </header>
+    <div className="min-h-screen bg-black">
+      <Navbar />
+      <Toaster position="top-center" richColors />
 
       {/* Registration Form */}
-      <div className="container mx-auto px-4 py-12">
-        <Card className="max-w-3xl mx-auto bg-black/60 border-red-900/30 backdrop-blur-sm">
-          <CardHeader>
-            <CardTitle className="text-3xl font-bold text-white">
-              Tryout Registration
-            </CardTitle>
-            <CardDescription className="text-gray-400">
-              Register your child for Shadow Basketball tryouts
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Parent Information */}
-              <div className="space-y-4">
-                <h3 className="text-xl font-semibold text-red-500">
-                  Parent/Guardian Information
-                </h3>
-
-                <div className="space-y-2">
-                  <Label htmlFor="parentName" className="text-white">
-                    Full Name *
-                  </Label>
-                  <Input
-                    id="parentName"
-                    required
-                    value={formData.parentName}
-                    onChange={(e) =>
-                      setFormData({ ...formData, parentName: e.target.value })
-                    }
-                    className="bg-black/40 border-red-900/30 text-white"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="parentEmail" className="text-white">
-                    Email *
-                  </Label>
-                  <Input
-                    id="parentEmail"
-                    type="email"
-                    required
-                    value={formData.parentEmail}
-                    onChange={(e) =>
-                      setFormData({ ...formData, parentEmail: e.target.value })
-                    }
-                    className="bg-black/40 border-red-900/30 text-white"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="parentPhone" className="text-white">
-                    Phone Number *
-                  </Label>
-                  <Input
-                    id="parentPhone"
-                    type="tel"
-                    required
-                    value={formData.parentPhone}
-                    onChange={(e) =>
-                      setFormData({ ...formData, parentPhone: e.target.value })
-                    }
-                    className="bg-black/40 border-red-900/30 text-white"
-                  />
-                </div>
-              </div>
-
-              {/* Player Information */}
-              <div className="space-y-4">
-                <h3 className="text-xl font-semibold text-red-500">
-                  Player Information
-                </h3>
-
-                <div className="space-y-2">
-                  <Label htmlFor="playerName" className="text-white">
-                    Player Full Name *
-                  </Label>
-                  <Input
-                    id="playerName"
-                    required
-                    value={formData.playerName}
-                    onChange={(e) =>
-                      setFormData({ ...formData, playerName: e.target.value })
-                    }
-                    className="bg-black/40 border-red-900/30 text-white"
-                  />
-                </div>
-
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="playerAge" className="text-white">
-                      Age *
-                    </Label>
-                    <Input
-                      id="playerAge"
-                      type="number"
-                      required
-                      min="5"
-                      max="18"
-                      value={formData.playerAge}
-                      onChange={(e) =>
-                        setFormData({ ...formData, playerAge: e.target.value })
-                      }
-                      className="bg-black/40 border-red-900/30 text-white"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="playerGrade" className="text-white">
-                      Grade *
-                    </Label>
-                    <Input
-                      id="playerGrade"
-                      required
-                      placeholder="e.g., 5th Grade"
-                      value={formData.playerGrade}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          playerGrade: e.target.value,
-                        })
-                      }
-                      className="bg-black/40 border-red-900/30 text-white"
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="medicalInfo" className="text-white">
-                    Medical Information
-                  </Label>
-                  <Input
-                    id="medicalInfo"
-                    placeholder="Any allergies, conditions, or medications"
-                    value={formData.medicalInfo}
-                    onChange={(e) =>
-                      setFormData({ ...formData, medicalInfo: e.target.value })
-                    }
-                    className="bg-black/40 border-red-900/30 text-white"
-                  />
-                </div>
-              </div>
-
-              {/* Emergency Contact */}
-              <div className="space-y-4">
-                <h3 className="text-xl font-semibold text-red-500">
-                  Emergency Contact
-                </h3>
-
-                <div className="space-y-2">
-                  <Label htmlFor="emergencyContact" className="text-white">
-                    Contact Name *
-                  </Label>
-                  <Input
-                    id="emergencyContact"
-                    required
-                    value={formData.emergencyContact}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        emergencyContact: e.target.value,
-                      })
-                    }
-                    className="bg-black/40 border-red-900/30 text-white"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="emergencyPhone" className="text-white">
-                    Contact Phone *
-                  </Label>
-                  <Input
-                    id="emergencyPhone"
-                    type="tel"
-                    required
-                    value={formData.emergencyPhone}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        emergencyPhone: e.target.value,
-                      })
-                    }
-                    className="bg-black/40 border-red-900/30 text-white"
-                  />
-                </div>
-              </div>
-
-              {/* Tryout Selection */}
-              <div className="space-y-4">
-                <h3 className="text-xl font-semibold text-red-500">
-                  Select Tryout Session *
-                </h3>
-
-                {loading ? (
-                  <p className="text-gray-400">Loading tryout sessions...</p>
-                ) : tryouts.length === 0 ? (
-                  <p className="text-gray-400">
-                    No tryout sessions available at this time.
-                  </p>
-                ) : (
-                  <div className="space-y-3">
-                    {tryouts.map((tryout) => (
-                      <label
-                        key={tryout.id}
-                        className={`block p-4 border rounded-lg cursor-pointer transition-all ${
-                          formData.tryoutId === tryout.id
-                            ? "border-red-600 bg-red-950/30"
-                            : "border-red-900/30 bg-black/20 hover:border-red-800"
-                        }`}
-                      >
-                        <input
-                          type="radio"
-                          name="tryout"
-                          value={tryout.id}
-                          checked={formData.tryoutId === tryout.id}
-                          onChange={(e) =>
-                            setFormData({
-                              ...formData,
-                              tryoutId: e.target.value,
-                            })
-                          }
-                          className="sr-only"
-                          required
-                        />
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <p className="text-white font-semibold">
-                              {tryout.ageGroup}
-                            </p>
-                            <p className="text-gray-400 text-sm">
-                              {new Date(tryout.date).toLocaleDateString(
-                                "en-US",
-                                {
-                                  weekday: "long",
-                                  year: "numeric",
-                                  month: "long",
-                                  day: "numeric",
-                                },
-                              )}
-                            </p>
-                            <p className="text-gray-400 text-sm">
-                              {tryout.startTime} - {tryout.endTime}
-                            </p>
-                            <p className="text-gray-400 text-sm">
-                              {tryout.location}
-                            </p>
-                            {tryout.notes && (
-                              <p className="text-gray-500 text-xs mt-1">
-                                {tryout.notes}
-                              </p>
-                            )}
-                          </div>
-                        </div>
-                      </label>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {message && (
-                <div
-                  className={`p-4 rounded-lg ${
-                    message.includes("successful")
-                      ? "bg-green-900/30 border border-green-700 text-green-400"
-                      : "bg-red-900/30 border border-red-700 text-red-400"
-                  }`}
-                >
-                  {message}
-                </div>
-              )}
-
-              <Button
-                type="submit"
-                disabled={submitting || loading || tryouts.length === 0}
-                className="w-full bg-red-600 hover:bg-red-700 text-white text-lg py-6"
+      <div className="container mx-auto px-4 pt-36 pb-20 relative">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.98 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5 }}
+          className="max-w-4xl mx-auto"
+        >
+          <Card className="bg-zinc-950 border-zinc-800 rounded-3xl overflow-hidden">
+            <CardHeader className="text-center p-12 border-b border-zinc-800">
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                className="flex justify-center mb-6"
               >
-                {submitting ? "Submitting..." : "Complete Registration"}
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
+                <div className="bg-zinc-900 p-4 rounded-2xl">
+                  <ClipboardCheck className="text-red-600" size={40} />
+                </div>
+              </motion.div>
+              <CardTitle className="text-5xl md:text-6xl font-impact tracking-wider text-white uppercase leading-none">
+                TRYOUT <span className="text-red-600">REGISTRATION</span>
+              </CardTitle>
+              <CardDescription className="text-zinc-500 mt-4 text-xl font-light">
+                Join the Shadow Basketball legacy. Complete the fields below to register your player.
+              </CardDescription>
+            </CardHeader>
+            
+            <CardContent className="p-10 md:p-16">
+              {loading ? (
+                <div className="flex flex-col items-center justify-center py-20 gap-6 text-zinc-500">
+                  <Loader2 className="animate-spin text-red-600" size={48} />
+                  <p className="font-impact uppercase tracking-widest text-lg">Loading Elite Program...</p>
+                </div>
+              ) : (
+                <form onSubmit={handleSubmit}>
+                  <motion.div 
+                    variants={staggerContainer}
+                    initial="hidden"
+                    animate="visible"
+                    className="space-y-16"
+                  >
+                    {/* Section 1: Parent */}
+                    <motion.div variants={fadeInUp} className="space-y-8">
+                      <div className="flex items-center gap-6">
+                        <div className="bg-red-600 w-1.5 h-10 rounded-full "></div>
+                        <h3 className="text-2xl font-impact text-white uppercase tracking-wider flex items-center gap-3">
+                          <User className="text-red-600" size={20} />
+                          Guardian Profile
+                        </h3>
+                      </div>
+
+                      <div className="grid md:grid-cols-2 gap-8">
+                        <div className="space-y-3">
+                          <Label htmlFor="parentName" className="text-zinc-500 font-bold uppercase text-[10px] tracking-[0.2em] ml-1">Full Name</Label>
+                          <Input
+                            id="parentName"
+                            required
+                            value={formData.parentName}
+                            onChange={(e) => setFormData({ ...formData, parentName: e.target.value })}
+                            className="bg-zinc-900/50 border-zinc-800 text-white focus:border-red-600 h-14 rounded-2xl transition-all"
+                          />
+                        </div>
+
+                        <div className="space-y-3">
+                          <Label htmlFor="parentEmail" className="text-zinc-500 font-bold uppercase text-[10px] tracking-[0.2em] ml-1">Email Address</Label>
+                          <Input
+                            id="parentEmail"
+                            type="email"
+                            required
+                            value={formData.parentEmail}
+                            onChange={(e) => setFormData({ ...formData, parentEmail: e.target.value })}
+                            className="bg-zinc-900/50 border-zinc-800 text-white focus:border-red-600 h-14 rounded-2xl transition-all"
+                          />
+                        </div>
+
+                        <div className="space-y-3 md:col-span-2">
+                          <Label htmlFor="parentPhone" className="text-zinc-500 font-bold uppercase text-[10px] tracking-[0.2em] ml-1">Phone Number</Label>
+                          <Input
+                            id="parentPhone"
+                            type="tel"
+                            required
+                            placeholder="(555) 000-0000"
+                            value={formData.parentPhone}
+                            onChange={(e) => setFormData({ ...formData, parentPhone: e.target.value })}
+                            className="bg-zinc-900/50 border-zinc-800 text-white focus:border-red-600 h-14 rounded-2xl transition-all"
+                          />
+                        </div>
+                      </div>
+                    </motion.div>
+
+                    {/* Section 2: Player */}
+                    <motion.div variants={fadeInUp} className="space-y-8">
+                      <div className="flex items-center gap-6">
+                        <div className="bg-red-600 w-1.5 h-10 rounded-full "></div>
+                        <h3 className="text-2xl font-impact text-white uppercase tracking-wider flex items-center gap-3">
+                          <Zap className="text-red-600" size={20} />
+                          Athlete Information
+                        </h3>
+                      </div>
+
+                      <div className="grid md:grid-cols-2 gap-8">
+                        <div className="space-y-3 md:col-span-2">
+                          <Label htmlFor="playerName" className="text-zinc-500 font-bold uppercase text-[10px] tracking-[0.2em] ml-1">Player Full Name</Label>
+                          <Input
+                            id="playerName"
+                            required
+                            value={formData.playerName}
+                            onChange={(e) => setFormData({ ...formData, playerName: e.target.value })}
+                            className="bg-zinc-900/50 border-zinc-800 text-white focus:border-red-600 h-14 rounded-2xl transition-all"
+                          />
+                        </div>
+
+                        <div className="space-y-3">
+                          <Label htmlFor="playerAge" className="text-zinc-500 font-bold uppercase text-[10px] tracking-[0.2em] ml-1">Age</Label>
+                          <Input
+                            id="playerAge"
+                            type="number"
+                            required
+                            min="5"
+                            max="18"
+                            value={formData.playerAge}
+                            onChange={(e) => setFormData({ ...formData, playerAge: e.target.value })}
+                            className="bg-zinc-900/50 border-zinc-800 text-white focus:border-red-600 h-14 rounded-2xl transition-all"
+                          />
+                        </div>
+
+                        <div className="space-y-3">
+                          <Label htmlFor="playerGrade" className="text-zinc-500 font-bold uppercase text-[10px] tracking-[0.2em] ml-1">Current Grade</Label>
+                          <Input
+                            id="playerGrade"
+                            required
+                            placeholder="e.g. 8th Grade"
+                            value={formData.playerGrade}
+                            onChange={(e) => setFormData({ ...formData, playerGrade: e.target.value })}
+                            className="bg-zinc-900/50 border-zinc-800 text-white focus:border-red-600 h-14 rounded-2xl transition-all"
+                          />
+                        </div>
+
+                        <div className="space-y-3 md:col-span-2">
+                          <Label htmlFor="medicalInfo" className="text-zinc-500 font-bold uppercase text-[10px] tracking-[0.2em] ml-1">Medical Info / Allergies</Label>
+                          <Input
+                            id="medicalInfo"
+                            placeholder="Optional: Any conditions our staff should know"
+                            value={formData.medicalInfo}
+                            onChange={(e) => setFormData({ ...formData, medicalInfo: e.target.value })}
+                            className="bg-zinc-900/50 border-zinc-800 text-white focus:border-red-600 h-14 rounded-2xl transition-all"
+                          />
+                        </div>
+                      </div>
+                    </motion.div>
+
+                    {/* Section 3: Emergency */}
+                    <motion.div variants={fadeInUp} className="space-y-8">
+                      <div className="flex items-center gap-6">
+                        <div className="bg-red-600 w-1.5 h-10 rounded-full "></div>
+                        <h3 className="text-2xl font-impact text-white uppercase tracking-wider flex items-center gap-3">
+                          <ShieldCheck className="text-red-600" size={20} />
+                          Emergency Contact
+                        </h3>
+                      </div>
+
+                      <div className="grid md:grid-cols-2 gap-8">
+                        <div className="space-y-3">
+                          <Label htmlFor="emergencyContact" className="text-zinc-500 font-bold uppercase text-[10px] tracking-[0.2em] ml-1">Contact Name</Label>
+                          <Input
+                            id="emergencyContact"
+                            required
+                            value={formData.emergencyContact}
+                            onChange={(e) => setFormData({ ...formData, emergencyContact: e.target.value })}
+                            className="bg-zinc-900/50 border-zinc-800 text-white focus:border-red-600 h-14 rounded-2xl transition-all"
+                          />
+                        </div>
+
+                        <div className="space-y-3">
+                          <Label htmlFor="emergencyPhone" className="text-zinc-500 font-bold uppercase text-[10px] tracking-[0.2em] ml-1">Contact Phone</Label>
+                          <Input
+                            id="emergencyPhone"
+                            type="tel"
+                            required
+                            value={formData.emergencyPhone}
+                            onChange={(e) => setFormData({ ...formData, emergencyPhone: e.target.value })}
+                            className="bg-zinc-900/50 border-zinc-800 text-white focus:border-red-600 h-14 rounded-2xl transition-all"
+                          />
+                        </div>
+                      </div>
+                    </motion.div>
+
+                    {/* Section 4: Selection */}
+                    <motion.div variants={fadeInUp} className="space-y-8">
+                      <div className="flex items-center gap-6">
+                        <div className="bg-red-600 w-1.5 h-10 rounded-full "></div>
+                        <h3 className="text-2xl font-impact text-white uppercase tracking-wider flex items-center gap-3">
+                          Select Tryout Session
+                        </h3>
+                      </div>
+
+                      {tryouts.length === 0 ? (
+                        <div className="p-12 bg-zinc-900/30 rounded-[2rem] border border-zinc-900 text-center">
+                          <p className="text-zinc-600 font-bold uppercase tracking-widest italic text-sm">No active tryout sessions found</p>
+                        </div>
+                      ) : (
+                        <div className="grid gap-4">
+                          {tryouts.map((tryout) => (
+                            <label
+                              key={tryout.id}
+                              className={`relative block p-8 border rounded-[2rem] cursor-pointer transition-all duration-500 ${
+                                formData.tryoutId === tryout.id
+                                  ? "border-red-600 bg-red-950/10 shadow-[0_0_30px_rgba(220,38,38,0.15)] ring-1 ring-red-600/50"
+                                  : "border-zinc-900 bg-black hover:border-zinc-700"
+                              }`}
+                            >
+                              <input
+                                type="radio"
+                                name="tryout"
+                                value={tryout.id}
+                                checked={formData.tryoutId === tryout.id}
+                                onChange={(e) => setFormData({ ...formData, tryoutId: e.target.value })}
+                                className="sr-only"
+                                required
+                              />
+                              <div className="flex justify-between items-center">
+                                <div className="space-y-2">
+                                  <p className="text-white font-impact text-2xl uppercase tracking-wider group-hover:text-red-500 transition-colors">
+                                    {tryout.ageGroup}
+                                  </p>
+                                  <div className="flex flex-wrap gap-x-6 gap-y-2 text-zinc-500 font-medium">
+                                    <span className="flex items-center gap-2">
+                                      <div className="h-1.5 w-1.5 rounded-full bg-red-600"></div>
+                                      {new Date(tryout.date).toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" })}
+                                    </span>
+                                    <span className="flex items-center gap-2">
+                                      <div className="h-1.5 w-1.5 rounded-full bg-red-600"></div>
+                                      {tryout.startTime} - {tryout.endTime}
+                                    </span>
+                                  </div>
+                                </div>
+                                <div className={`w-8 h-8 rounded-full border-2 flex items-center justify-center transition-all duration-500 ${
+                                  formData.tryoutId === tryout.id ? "bg-red-600 border-red-600" : "border-zinc-800"
+                                }`}>
+                                  {formData.tryoutId === tryout.id && <CheckCircle2 size={18} className="text-white" />}
+                                </div>
+                              </div>
+                            </label>
+                          ))}
+                        </div>
+                      )}
+                    </motion.div>
+
+                    <motion.div variants={fadeInUp} className="pt-10 border-t border-zinc-800">
+                      <Button
+                        type="submit"
+                        disabled={submitting || tryouts.length === 0}
+                        className="w-full bg-red-600 hover:bg-red-700 text-white font-impact text-3xl h-24 rounded-2xl transition-all active:scale-[0.98] group"
+                      >
+                        {submitting ? (
+                          <div className="flex items-center gap-4 uppercase tracking-tighter">
+                            <Loader2 className="animate-spin" size={32} /> SUBMITTING...
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-4">
+                            COMPLETE REGISTRATION <CheckCircle2 className="group-hover:translate-x-1 transition-transform" />
+                          </div>
+                        )}
+                      </Button>
+                      <p className="text-center text-zinc-700 text-[10px] font-black uppercase tracking-[0.4em] mt-8 leading-loose">
+                        Official Shadow Basketball registration portal • &copy; 2026 Season
+                      </p>
+                    </motion.div>
+                  </motion.div>
+                </form>
+              )}
+            </CardContent>
+          </Card>
+        </motion.div>
       </div>
     </div>
   );

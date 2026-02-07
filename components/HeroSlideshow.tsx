@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
+import { motion, AnimatePresence } from "framer-motion";
 
 const actionShots = [
   "/action_shot_1.jpg",
@@ -17,29 +18,31 @@ export default function HeroSlideshow() {
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentIndex((prevIndex) => (prevIndex + 1) % actionShots.length);
-    }, 20000); // Change every 20 seconds
+    }, 20000);
 
     return () => clearInterval(interval);
   }, []);
 
   return (
     <div className="relative w-full h-full overflow-hidden">
-      {actionShots.map((image, index) => (
-        <div
-          key={image}
-          className={`absolute inset-0 transition-opacity duration-1000 ${
-            index === currentIndex ? "opacity-100" : "opacity-0"
-          }`}
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={currentIndex}
+          initial={{ opacity: 0, scale: 1.1 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 1.2, ease: "easeInOut" }}
+          className="absolute inset-0"
         >
           <Image
-            src={image}
-            alt={`Shadow Basketball Action Shot ${index + 1}`}
+            src={actionShots[currentIndex]}
+            alt={`Shadow Basketball Action Shot ${currentIndex + 1}`}
             fill
             className="object-cover object-top"
-            priority={index === 0}
+            priority={currentIndex === 0}
           />
-        </div>
-      ))}
+        </motion.div>
+      </AnimatePresence>
     </div>
   );
 }

@@ -1,59 +1,51 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
-import { RegistrationWithTryout } from "@/types/database";
+import prisma from "@/lib/prisma";
 
 export async function GET() {
   try {
     const supabase = await createClient();
-    const { data: registrations, error } = await supabase
-      .from("registration")
-      .select(`
-        *,
-        tryout:tryout_id (
-          age_group,
-          date,
-          location,
-          start_time,
-          end_time
-        )
-      `)
-      .order("created_at", { ascending: false });
+    const { data: { user } } = await supabase.auth.getUser();
 
-    if (error) {
-      console.error("Supabase error fetching registrations:", error);
-      return NextResponse.json({ error: error.message }, { status: 500 });
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    if (!registrations) {
-      return NextResponse.json([]);
+    // Get user role
+    const profile = await prisma.profile.findUnique({
+      where: { id: user.id }
+    });
+
+    let registrations;
+
+    if (profile?.role === "admin") {
+      // Admins see everything
+      registrations = await prisma.registration.findMany({
+        orderBy: { createdAt: "desc" },
+        include: {
+          tryout: true,
+        },
+      });
+    } else {
+      // Parents only see their own
+      registrations = await prisma.registration.findMany({
+        where: {
+          OR: [
+            { userId: user.id },
+            { parentEmail: user.email }
+          ]
+        },
+        orderBy: { createdAt: "desc" },
+        include: {
+          tryout: true,
+        },
+      });
     }
 
-    // Map to match frontend expectations (camelCase)
-    const formattedRegistrations = (registrations as unknown as RegistrationWithTryout[]).map((reg) => ({
-      id: reg.id,
-      parentName: reg.parent_name,
-      parentEmail: reg.parent_email,
-      parentPhone: reg.parent_phone,
-      playerName: reg.player_name,
-      playerAge: reg.player_age,
-      playerGrade: reg.player_grade,
-      medicalInfo: reg.medical_info,
-      emergencyContact: reg.emergency_contact,
-      emergencyPhone: reg.emergency_phone,
-      createdAt: reg.created_at,
-      tryout: {
-        ageGroup: reg.tryout?.age_group,
-        date: reg.tryout?.date,
-        location: reg.tryout?.location,
-        startTime: reg.tryout?.start_time,
-        endTime: reg.tryout?.end_time,
-      },
-    }));
-
-    return NextResponse.json(formattedRegistrations);
+    return NextResponse.json(registrations);
   } catch (error) {
-    console.error("Unexpected error fetching registrations:", error);
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+    console.error("Prisma error fetching registrations:", error);
+    return NextResponse.json({ error: "Failed to fetch registrations" }, { status: 500 });
   }
 }
 
@@ -91,29 +83,26 @@ export async function POST(request: Request) {
       );
     }
 
-    // Check capacity
-    const { data: tryout, error: tryoutError } = await supabase
-      .from("tryout")
-      .select(`
-        id,
-        max_capacity,
-        registrations:registration(count)
-      `)
-      .eq("id", tryoutId)
-      .single();
+    // Check capacity using Prisma
+    const tryout = await prisma.tryout.findUnique({
+      where: { id: tryoutId },
+      include: {
+        _count: {
+          select: { registrations: true },
+        },
+      },
+    });
 
-    if (tryoutError || !tryout) {
+    if (!tryout) {
       return NextResponse.json(
         { error: "Tryout session not found" },
         { status: 404 }
       );
     }
 
-    const regCount = (tryout.registrations as unknown as { count: number }[])[0]?.count || 0;
-
     if (
-      tryout.max_capacity !== null &&
-      regCount >= tryout.max_capacity
+      tryout.maxCapacity !== null &&
+      tryout._count.registrations >= tryout.maxCapacity
     ) {
       return NextResponse.json(
         { error: "This tryout session is full" },
@@ -124,32 +113,25 @@ export async function POST(request: Request) {
     // Get current user if authenticated
     const { data: { user } } = await supabase.auth.getUser();
 
-    const { data: registration, error: regError } = await supabase
-      .from("registration")
-      .insert({
-        parent_name: parentName,
-        parent_email: parentEmail,
-        parent_phone: parentPhone,
-        player_name: playerName,
-        player_age: playerAge,
-        player_grade: playerGrade,
-        medical_info: medicalInfo || null,
-        emergency_contact: emergencyContact,
-        emergency_phone: emergencyPhone,
-        tryout_id: tryoutId,
-        user_id: user?.id || null,
-      })
-      .select()
-      .single();
-
-    if (regError) {
-      console.error("Supabase error creating registration:", regError);
-      return NextResponse.json({ error: regError.message }, { status: 500 });
-    }
+    const registration = await prisma.registration.create({
+      data: {
+        parentName,
+        parentEmail,
+        parentPhone,
+        playerName,
+        playerAge: parseInt(playerAge.toString()),
+        playerGrade,
+        medicalInfo: medicalInfo || null,
+        emergencyContact,
+        emergencyPhone,
+        tryoutId,
+        userId: user?.id || null,
+      },
+    });
 
     return NextResponse.json(registration, { status: 201 });
   } catch (error) {
-    console.error("Unexpected error creating registration:", error);
+    console.error("Prisma error creating registration:", error);
     return NextResponse.json(
       { error: "Failed to create registration" },
       { status: 500 }

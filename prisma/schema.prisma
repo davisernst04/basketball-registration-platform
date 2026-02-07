@@ -1,0 +1,59 @@
+generator client {
+  provider        = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Profile {
+  id        String    @id @db.Uuid
+  updatedAt DateTime? @map("updated_at") @db.Timestamptz(6)
+  username  String?   @unique
+  fullName  String?   @map("full_name")
+  avatarUrl String?   @map("avatar_url")
+  website   String?
+  role      String    @default("parent")
+  email     String?
+
+  @@map("profiles")
+}
+
+model Tryout {
+  id            String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  location      String
+  date          DateTime       @db.Timestamptz(6)
+  startTime     String         @map("start_time")
+  endTime       String         @map("end_time")
+  ageGroup      String         @map("age_group")
+  maxCapacity   Int?           @map("max_capacity")
+  notes         String?
+  createdAt     DateTime       @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime       @default(now()) @map("updated_at") @db.Timestamptz(6)
+  registrations Registration[]
+
+  @@map("tryout")
+}
+
+model Registration {
+  id               String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  parentName       String   @map("parent_name")
+  parentEmail      String   @map("parent_email")
+  parentPhone      String   @map("parent_phone")
+  playerName       String   @map("player_name")
+  playerAge        Int      @map("player_age")
+  playerGrade      String   @map("player_grade")
+  medicalInfo      String?  @map("medical_info")
+  emergencyContact String   @map("emergency_contact")
+  emergencyPhone   String   @map("emergency_phone")
+  tryoutId         String   @map("tryout_id") @db.Uuid
+  userId           String?  @map("user_id") @db.Uuid
+  createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime @default(now()) @map("updated_at") @db.Timestamptz(6)
+  
+  tryout           Tryout   @relation(fields: [tryoutId], references: [id], onDelete: Cascade)
+
+  @@map("registration")
+}
