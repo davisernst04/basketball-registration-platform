@@ -119,9 +119,9 @@ export default function ParentDashboard() {
               </div>
               <Button 
                 onClick={() => router.push("/register")}
-                className="bg-red-600 hover:bg-red-700 text-white font-bold h-16 px-8 rounded-2xl group transition-all hover:scale-105"
+                className="bg-red-600 hover:bg-red-700 text-white font-bold h-16 px-8 rounded-2xl transition-colors"
               >
-                <PlusCircle className="mr-2 h-6 w-6 group-hover:rotate-90 transition-transform" /> 
+                <PlusCircle className="mr-2 h-6 w-6" /> 
                 REGISTER NEW PLAYER
               </Button>
             </div>
@@ -179,14 +179,14 @@ export default function ParentDashboard() {
                 >
                   {registrations.map((reg) => (
                     <motion.div key={reg.id} variants={itemVariants}>
-                      <Card className="bg-zinc-950 border-zinc-800 overflow-hidden group hover:border-red-600/50 transition-all rounded-2xl shadow-lg">
+                      <Card className="bg-zinc-950 border-zinc-800 overflow-hidden transition-colors rounded-2xl shadow-lg">
                         <div className="flex flex-col md:flex-row">
                           <div className="bg-gradient-to-br from-red-900/20 to-transparent p-8 flex flex-col justify-center items-center text-center border-b md:border-b-0 md:border-r border-zinc-900 md:w-1/3">
                             <div className="bg-red-600/10 p-4 rounded-2xl mb-4 border border-red-600/20">
                               <Trophy className="text-red-600 w-8 h-8" />
                             </div>
                             <span className="text-xs text-zinc-500 font-bold uppercase tracking-widest">Elite Player</span>
-                            <span className="text-3xl font-impact text-white uppercase mt-1 group-hover:text-red-500 transition-colors">{reg.playerName}</span>
+                            <span className="text-3xl font-impact text-white uppercase mt-1">{reg.playerName}</span>
                             <Badge variant="outline" className="mt-3 border-zinc-800 text-zinc-400 px-4 py-1">
                               {reg.playerGrade}
                             </Badge>

@@ -30,15 +30,15 @@ A youth basketball team registration platform for Shadow Basketball, featuring a
 
 - **Frontend**: Next.js 16 with React 19
 - **UI Components**: shadcn/ui with Tailwind CSS 4
-- **Database**: PostgreSQL with Prisma ORM
-- **Authentication**: Better Auth
+- **Database**: Supabase (PostgreSQL)
+- **Authentication**: Supabase Auth
 - **Theme**: Custom red and black color scheme
 
 ## Getting Started
 
 ### Prerequisites
 - Node.js (v20 or higher)
-- PostgreSQL database
+- Supabase account
 - npm or yarn
 
 ### Installation
@@ -55,29 +55,22 @@ npm install
 ```
 
 3. Set up environment variables
-Create a `.env` file in the root directory:
+Create a `.env.local` file in the root directory:
 ```
-DATABASE_URL="your-postgresql-connection-string"
-BETTER_AUTH_SECRET="your-secret-key"
-BETTER_AUTH_URL="http://localhost:3000"
+NEXT_PUBLIC_SUPABASE_URL="your-supabase-url"
+NEXT_PUBLIC_SUPABASE_ANON_KEY="your-supabase-anon-key"
+SUPABASE_SERVICE_ROLE_KEY="your-supabase-service-role-key"
 ```
 
 4. Push the database schema
-```bash
-npx prisma db push
-```
+Use the Supabase dashboard or CLI to apply migrations in `supabase/migrations/`.
 
-5. Seed the database with sample tryout sessions
-```bash
-npx tsx prisma/seed.ts
-```
-
-6. Run the development server
+5. Run the development server
 ```bash
 npm run dev
 ```
 
-7. Open [http://localhost:3000](http://localhost:3000) in your browser
+6. Open [http://localhost:3000](http://localhost:3000) in your browser
 
 ## Pages
 
@@ -85,26 +78,23 @@ npm run dev
 - **/register** - Registration form for parents
 - **/tryouts** - Public tryout schedule
 - **/dashboard** - Admin dashboard for coaches
-- **/sign-in** - Authentication for coaches
-- **/sign-up** - Registration for coach accounts
+- **/parent-dashboard** - Portal for parents to view their registrations
+- **/profile** - User profile management
+- **/sign-in** - Authentication
+- **/sign-up** - Account creation
 
 ## Database Schema
 
-### User
-- Authentication and user management
-- Role-based access (parent/coach)
+Managed directly via Supabase. Refer to `supabase/migrations/` for the SQL definitions.
 
-### Tryout
+### profiles
+- User metadata and roles
+
+### tryout
 - Tryout session information
-- Location, date, time details
-- Age group categorization
-- Capacity management
 
-### Registration
+### registration
 - Player registration data
-- Parent contact information
-- Medical and emergency contact details
-- Links to specific tryout sessions
 
 ## Customization
 
@@ -125,14 +115,10 @@ npm run build
 npm start
 ```
 
-### Run Database Migrations
+### Database Migrations
+Use the Supabase CLI:
 ```bash
-npx prisma migrate dev
-```
-
-### Generate Prisma Client
-```bash
-npx prisma generate
+supabase migration new <name>
 ```
 
 ## Support

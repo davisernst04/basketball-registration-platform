@@ -68,25 +68,21 @@ export default function Home() {
             </motion.p>
 
             <motion.div variants={fadeInUp} className="flex flex-col sm:flex-row gap-4 pt-4 w-full">
-              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                <Button
-                  onClick={() => router.push("/register")}
-                  size="lg"
-                  className="font-impact bg-red-600 hover:bg-red-700 text-white text-lg md:text-xl px-10 py-8 w-full sm:w-auto"
-                >
-                  REGISTER NOW
-                </Button>
-              </motion.div>
-              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                <Button
-                  onClick={() => router.push("/tryouts")}
-                  size="lg"
-                  variant="outline"
-                  className="font-impact border-2 border-zinc-700 bg-transparent text-white hover:bg-white hover:text-black text-lg md:text-xl px-10 py-8 w-full sm:w-auto"
-                >
-                  TRYOUT INFO
-                </Button>
-              </motion.div>
+              <Button
+                onClick={() => router.push("/register")}
+                size="lg"
+                className="font-impact bg-red-600 hover:bg-red-700 text-white text-lg md:text-xl px-10 py-8 w-full sm:w-auto rounded-xl"
+              >
+                REGISTER NOW
+              </Button>
+              <Button
+                onClick={() => router.push("/tryouts")}
+                size="lg"
+                variant="outline"
+                className="font-impact border-2 border-zinc-700 bg-transparent text-white hover:bg-zinc-800 text-lg md:text-xl px-10 py-8 w-full sm:w-auto rounded-xl"
+              >
+                TRYOUT INFO
+              </Button>
             </motion.div>
           </motion.div>
         </div>
@@ -116,7 +112,6 @@ export default function Home() {
               <motion.div 
                 key={i} 
                 variants={fadeInUp} 
-                whileHover={{ scale: 1.05, y: -5 }}
                 className="text-center space-y-2 group cursor-default"
               >
                 <div className="flex items-center justify-center gap-2 text-red-600/50 mb-1 group-hover:text-red-600 transition-colors">
@@ -233,17 +228,15 @@ export default function Home() {
               <motion.div 
                 key={i} 
                 variants={fadeInUp}
-                whileHover={{ y: -10, transition: { duration: 0.3 } }}
                 className="bg-black border border-zinc-800 p-10 rounded-3xl hover:border-zinc-700 transition-colors group relative overflow-hidden"
               >
-                <motion.div 
+                <div 
                   className="mb-8 bg-zinc-900 p-5 inline-block rounded-2xl group-hover:bg-red-600 transition-colors duration-300"
-                  whileHover={{ rotate: [0, -10, 10, 0], transition: { duration: 0.5 } }}
                 >
                   <div className="text-white">
                     {program.icon}
                   </div>
-                </motion.div>
+                </div>
                 <h3 className="text-3xl font-impact text-white mb-4 tracking-wider uppercase">{program.title}</h3>
                 <p className="text-zinc-500 leading-relaxed mb-8 text-lg font-light">{program.desc}</p>
                 <Button variant="link" className="text-red-600 p-0 hover:text-red-500 font-bold group-hover:pl-2 transition-all">
@@ -326,25 +319,21 @@ export default function Home() {
               &quot;Don&apos;t practice until you get it right. Practice until you can&apos;t get it wrong.&quot;
             </p>
             <div className="flex flex-col sm:flex-row justify-center gap-6 pt-6">
-              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                <Button 
-                  onClick={() => router.push("/register")}
-                  size="lg" 
-                  className="bg-red-600 hover:bg-red-700 text-white font-impact text-3xl px-16 py-10 rounded-2xl"
-                >
-                  GET STARTED
-                </Button>
-              </motion.div>
-              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                <Button 
-                  onClick={() => router.push("/tryouts")}
-                  size="lg" 
-                  variant="outline"
-                  className="border-2 border-zinc-700 bg-transparent text-white hover:bg-white hover:text-black font-impact text-3xl px-16 py-10 rounded-2xl"
-                >
-                  VIEW SCHEDULE
-                </Button>
-              </motion.div>
+              <Button 
+                onClick={() => router.push("/register")}
+                size="lg" 
+                className="bg-red-600 hover:bg-red-700 text-white font-impact text-3xl px-16 py-10 rounded-2xl"
+              >
+                GET STARTED
+              </Button>
+              <Button 
+                onClick={() => router.push("/tryouts")}
+                size="lg" 
+                variant="outline"
+                className="border-2 border-zinc-700 bg-transparent text-white hover:bg-zinc-800 font-impact text-3xl px-16 py-10 rounded-2xl"
+              >
+                VIEW SCHEDULE
+              </Button>
             </div>
           </motion.div>
         </div>

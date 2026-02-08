@@ -74,9 +74,7 @@ export default function Navbar() {
       className="border-b border-red-900/30 bg-black/70 backdrop-blur-sm fixed top-0 left-0 right-0 z-50 h-16 md:h-20"
     >
       <div className="h-full mx-auto px-6 md:px-16 flex justify-between items-center">
-        <motion.div
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
+        <div
           className="flex items-center gap-2 cursor-pointer"
           onClick={() => router.push("/")}
         >
@@ -90,7 +88,7 @@ export default function Navbar() {
           <span className="font-impact text-xl md:text-2xl text-white tracking-wider hidden sm:inline-block">
             SHADOW BASKETBALL
           </span>
-        </motion.div>
+        </div>
 
         <nav className="flex items-center gap-4 md:gap-6">
           {!loading && (
@@ -110,14 +108,12 @@ export default function Navbar() {
 
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}>
-                        <Avatar className="h-8 w-8 cursor-pointer border border-red-900/50">
-                          <AvatarImage src={user.user_metadata?.avatar_url} />
-                          <AvatarFallback className="bg-red-950 text-red-500 text-xs">
-                            {user.email?.substring(0, 2).toUpperCase()}
-                          </AvatarFallback>
-                        </Avatar>
-                      </motion.div>
+                      <Avatar className="h-8 w-8 cursor-pointer border border-red-900/50">
+                        <AvatarImage src={user.user_metadata?.avatar_url} />
+                        <AvatarFallback className="bg-red-950 text-red-500 text-xs">
+                          {user.email?.substring(0, 2).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent
                       align="end"
@@ -139,6 +135,12 @@ export default function Navbar() {
                       </DropdownMenuItem>
                       <DropdownMenuItem
                         className="cursor-pointer focus:bg-red-950 focus:text-white"
+                        onClick={() => router.push("/profile")}
+                      >
+                        Profile
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        className="cursor-pointer focus:bg-red-950 focus:text-white"
                         onClick={() => router.push("/tryouts")}
                       >
                         Tryouts
@@ -154,32 +156,25 @@ export default function Navbar() {
                   </DropdownMenu>
                 </div>
               ) : (
-                <motion.div 
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.3 }}
+                <div 
                   className="flex items-center gap-2 md:gap-3"
                 >
-                  <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                    <Button
-                      onClick={() => router.push("/sign-in")}
-                      variant="ghost"
-                      size="sm"
-                      className="text-gray-300 hover:text-white hover:bg-red-950/30 text-sm md:text-base px-4"
-                    >
-                      Sign In
-                    </Button>
-                  </motion.div>
-                  <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                    <Button
-                      onClick={() => router.push("/sign-up")}
-                      size="sm"
-                      className="bg-red-600 text-white hover:bg-red-700 text-sm md:text-base px-4"
-                    >
-                      Sign Up
-                    </Button>
-                  </motion.div>
-                </motion.div>
+                  <Button
+                    onClick={() => router.push("/sign-in")}
+                    variant="ghost"
+                    size="sm"
+                    className="text-gray-300 hover:text-white hover:bg-zinc-900 text-sm md:text-base px-4"
+                  >
+                    Sign In
+                  </Button>
+                  <Button
+                    onClick={() => router.push("/sign-up")}
+                    size="sm"
+                    className="bg-red-600 text-white hover:bg-red-700 text-sm md:text-base px-4 rounded-lg"
+                  >
+                    Sign Up
+                  </Button>
+                </div>
               )}
             </>
           )}

@@ -15,10 +15,13 @@ const inter = Inter({
   display: "swap",
 });
 
+export const viewport = {
+  themeColor: "#000000",
+};
+
 export const metadata: Metadata = {
   title: "Shadow Basketball",
   description: "Shadow Basketball Basketball Club Offical Website",
-  themeColor: "#000000",
 };
 
 export default function RootLayout({

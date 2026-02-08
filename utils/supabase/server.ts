@@ -1,4 +1,5 @@
 import { createServerClient } from "@supabase/ssr";
+import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -25,4 +26,8 @@ export const createClient = async () => {
       },
     },
   });
+};
+
+export const createPublicClient = () => {
+  return createSupabaseClient(supabaseUrl!, supabaseKey!);
 };

@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
+import { connection } from "next/server";
 import { createClient } from "@/utils/supabase/server";
-import prisma from "@/lib/prisma";
 
 export async function GET() {
+  await connection();
   try {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
@@ -12,129 +13,56 @@ export async function GET() {
     }
 
     // Get user role
-    const profile = await prisma.profile.findUnique({
-      where: { id: user.id }
-    });
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single();
 
-    let registrations;
+    let registrationsQuery = supabase
+      .from("registration")
+      .select(`
+        *,
+        tryout (*)
+      `)
+      .order("created_at", { ascending: false });
 
-    if (profile?.role === "admin") {
-      // Admins see everything
-      registrations = await prisma.registration.findMany({
-        orderBy: { createdAt: "desc" },
-        include: {
-          tryout: true,
-        },
-      });
-    } else {
+    if (profile?.role !== "admin") {
       // Parents only see their own
-      registrations = await prisma.registration.findMany({
-        where: {
-          OR: [
-            { userId: user.id },
-            { parentEmail: user.email }
-          ]
-        },
-        orderBy: { createdAt: "desc" },
-        include: {
-          tryout: true,
-        },
-      });
+      registrationsQuery = registrationsQuery.or(`user_id.eq.${user.id},parent_email.eq.${user.email}`);
     }
 
-    return NextResponse.json(registrations);
+    const { data: registrations, error } = await registrationsQuery;
+
+    if (error) throw error;
+
+    const formattedRegistrations = registrations.map((r: any) => ({
+      ...r,
+      parentName: r.parent_name,
+      parentEmail: r.parent_email,
+      parentPhone: r.parent_phone,
+      playerName: r.player_name,
+      playerAge: r.player_age,
+      playerGrade: r.player_grade,
+      medicalInfo: r.medical_info,
+      emergencyContact: r.emergency_contact,
+      emergencyPhone: r.emergency_phone,
+      tryoutId: r.tryout_id,
+      userId: r.user_id,
+      createdAt: r.created_at,
+      updatedAt: r.updated_at,
+      tryout: r.tryout ? {
+        ...r.tryout,
+        startTime: r.tryout.start_time,
+        endTime: r.tryout.end_time,
+        ageGroup: r.tryout.age_group,
+        maxCapacity: r.tryout.max_capacity,
+      } : null,
+    }));
+
+    return NextResponse.json(formattedRegistrations);
   } catch (error) {
-    console.error("Prisma error fetching registrations:", error);
+    console.error("Supabase error fetching registrations:", error);
     return NextResponse.json({ error: "Failed to fetch registrations" }, { status: 500 });
-  }
-}
-
-export async function POST(request: Request) {
-  try {
-    const supabase = await createClient();
-    const body = await request.json();
-    const {
-      parentName,
-      parentEmail,
-      parentPhone,
-      playerName,
-      playerAge,
-      playerGrade,
-      medicalInfo,
-      emergencyContact,
-      emergencyPhone,
-      tryoutId,
-    } = body;
-
-    if (
-      !parentName ||
-      !parentEmail ||
-      !parentPhone ||
-      !playerName ||
-      !playerAge ||
-      !playerGrade ||
-      !emergencyContact ||
-      !emergencyPhone ||
-      !tryoutId
-    ) {
-      return NextResponse.json(
-        { error: "Missing required fields" },
-        { status: 400 }
-      );
-    }
-
-    // Check capacity using Prisma
-    const tryout = await prisma.tryout.findUnique({
-      where: { id: tryoutId },
-      include: {
-        _count: {
-          select: { registrations: true },
-        },
-      },
-    });
-
-    if (!tryout) {
-      return NextResponse.json(
-        { error: "Tryout session not found" },
-        { status: 404 }
-      );
-    }
-
-    if (
-      tryout.maxCapacity !== null &&
-      tryout._count.registrations >= tryout.maxCapacity
-    ) {
-      return NextResponse.json(
-        { error: "This tryout session is full" },
-        { status: 400 }
-      );
-    }
-
-    // Get current user if authenticated
-    const { data: { user } } = await supabase.auth.getUser();
-
-    const registration = await prisma.registration.create({
-      data: {
-        parentName,
-        parentEmail,
-        parentPhone,
-        playerName,
-        playerAge: parseInt(playerAge.toString()),
-        playerGrade,
-        medicalInfo: medicalInfo || null,
-        emergencyContact,
-        emergencyPhone,
-        tryoutId,
-        userId: user?.id || null,
-      },
-    });
-
-    return NextResponse.json(registration, { status: 201 });
-  } catch (error) {
-    console.error("Prisma error creating registration:", error);
-    return NextResponse.json(
-      { error: "Failed to create registration" },
-      { status: 500 }
-    );
   }
 }

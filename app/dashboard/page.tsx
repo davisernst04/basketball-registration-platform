@@ -34,38 +34,21 @@ import {
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Toaster, toast } from "sonner";
+import { createTryout, updateTryout, deleteTryout } from "./actions";
+import { Tryout, Registration, TryoutFormData } from "@/types";
 
-interface Registration {
-  id: string;
-  parentName: string;
-  parentEmail: string;
-  parentPhone: string;
-  playerName: string;
-  playerAge: number;
-  playerGrade: string;
-  medicalInfo: string | null;
-  emergencyContact: string;
-  emergencyPhone: string;
-  createdAt: string;
-  tryoutId: string;
+interface ExtendedRegistration extends Registration {
+  createdAt: string | Date;
   tryout: {
     ageGroup: string;
-    date: string;
+    date: string | Date;
     location: string;
     startTime: string;
     endTime: string;
   };
 }
 
-interface Tryout {
-  id: string;
-  location: string;
-  date: string;
-  startTime: string;
-  endTime: string;
-  ageGroup: string;
-  maxCapacity: number | null;
-  notes: string | null;
+interface ExtendedTryout extends Tryout {
   _count: {
     registrations: number;
   };
@@ -90,18 +73,17 @@ const itemVariants = {
 };
 
 export default function DashboardPage() {
-  const router = useRouter();
-  const [registrations, setRegistrations] = useState<Registration[]>([]);
-  const [tryouts, setTryouts] = useState<Tryout[]>([]);
+  const [registrations, setRegistrations] = useState<ExtendedRegistration[]>([]);
+  const [tryouts, setTryouts] = useState<ExtendedTryout[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<
     "registrations" | "tryouts" | "create"
   >("registrations");
   const [selectedTryoutId, setSelectedTryoutId] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [editingTryout, setEditingTryout] = useState<Tryout | null>(null);
+  const [editingTryout, setEditingTryout] = useState<ExtendedTryout | null>(null);
 
-  const [newTryout, setNewTryout] = useState({
+  const [newTryout, setNewTryout] = useState<TryoutFormData>({
     location: "",
     date: "",
     startTime: "",
@@ -144,20 +126,13 @@ export default function DashboardPage() {
     e.preventDefault();
     
     try {
-      const response = await fetch("/api/tryouts", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...newTryout,
-          maxCapacity: newTryout.maxCapacity
-            ? parseInt(newTryout.maxCapacity)
-            : null,
-          date: new Date(newTryout.date).toISOString(),
-        }),
+      const result = await createTryout({
+        ...newTryout,
+        date: new Date(newTryout.date).toISOString(),
       });
 
-      if (response.ok) {
-        toast.success("Tryout session created successfully!");
+      if (result.success) {
+        toast.success(result.message);
         setNewTryout({
           location: "",
           date: "",
@@ -170,9 +145,10 @@ export default function DashboardPage() {
         loadData();
         setActiveTab("tryouts");
       } else {
-        toast.error("Failed to create tryout session");
+        toast.error(result.message || "Failed to create tryout session");
       }
     } catch (error) {
+      console.error(error);
       toast.error("An error occurred. Please try again.");
     }
   };
@@ -182,21 +158,14 @@ export default function DashboardPage() {
     if (!editingTryout) return;
 
     try {
-      const response = await fetch("/api/tryouts", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          id: editingTryout.id,
-          ...newTryout,
-          maxCapacity: newTryout.maxCapacity
-            ? parseInt(newTryout.maxCapacity)
-            : null,
-          date: new Date(newTryout.date).toISOString(),
-        }),
+      const result = await updateTryout({
+        id: editingTryout.id,
+        ...newTryout,
+        date: new Date(newTryout.date).toISOString(),
       });
 
-      if (response.ok) {
-        toast.success("Tryout session updated successfully!");
+      if (result.success) {
+        toast.success(result.message);
         setEditingTryout(null);
         setNewTryout({
           location: "",
@@ -210,7 +179,7 @@ export default function DashboardPage() {
         loadData();
         setActiveTab("tryouts");
       } else {
-        toast.error("Failed to update tryout session");
+        toast.error(result.message || "Failed to update tryout session");
       }
     } catch (error) {
       console.error("Error updating tryout:", error);
@@ -228,16 +197,14 @@ export default function DashboardPage() {
     }
 
     try {
-      const response = await fetch(`/api/tryouts?id=${id}`, {
-        method: "DELETE",
-      });
+      const result = await deleteTryout(id);
 
-      if (response.ok) {
-        toast.success("Tryout session deleted successfully!");
+      if (result.success) {
+        toast.success(result.message);
         if (selectedTryoutId === id) setSelectedTryoutId(null);
         loadData();
       } else {
-        toast.error("Failed to delete tryout session");
+        toast.error(result.message || "Failed to delete tryout session");
       }
     } catch (error) {
       console.error("Error deleting tryout:", error);
@@ -245,7 +212,7 @@ export default function DashboardPage() {
     }
   };
 
-  const startEditingTryout = (tryout: Tryout) => {
+  const startEditingTryout = (tryout: ExtendedTryout) => {
     setEditingTryout(tryout);
     setNewTryout({
       location: tryout.location,
@@ -371,12 +338,12 @@ export default function DashboardPage() {
                     {tryouts.map((tryout) => (
                       <motion.div key={tryout.id} variants={itemVariants}>
                         <Card 
-                          className="bg-zinc-950 border-zinc-800 hover:border-red-600 cursor-pointer transition-all group shadow-md"
+                          className="bg-zinc-950 border-zinc-800 cursor-pointer transition-colors shadow-md"
                           onClick={() => setSelectedTryoutId(tryout.id)}
                         >
                           <CardHeader className="pb-4">
                             <div className="flex justify-between items-start">
-                              <CardTitle className="text-xl font-impact tracking-wider text-white uppercase group-hover:text-red-500 transition-colors">
+                              <CardTitle className="text-xl font-impact tracking-wider text-white uppercase">
                                 {tryout.ageGroup}
                               </CardTitle>
                               <Badge className="bg-zinc-900 text-zinc-400 border-zinc-800">
@@ -391,7 +358,7 @@ export default function DashboardPage() {
                             </div>
                             <div className="flex items-center justify-between pt-2 border-t border-zinc-900">
                               <span className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest">Manage List</span>
-                              <ChevronRight className="text-zinc-700 group-hover:text-red-600 group-hover:translate-x-1 transition-all" size={18} />
+                              <ChevronRight className="text-zinc-700" size={18} />
                             </div>
                           </CardContent>
                         </Card>
@@ -521,11 +488,11 @@ export default function DashboardPage() {
                 ) : (
                   tryouts.map((tryout) => (
                     <motion.div key={tryout.id} variants={itemVariants}>
-                      <Card className="bg-zinc-950 border-zinc-800 hover:border-red-600 transition-all group h-full flex flex-col shadow-md">
+                      <Card className="bg-zinc-950 border-zinc-800 transition-colors h-full flex flex-col shadow-md">
                         <CardHeader className="border-b border-zinc-900 pb-4">
                           <div className="flex justify-between items-start">
                             <div className="space-y-1">
-                              <CardTitle className="text-2xl font-impact tracking-wider text-white uppercase group-hover:text-red-500 transition-colors">
+                              <CardTitle className="text-2xl font-impact tracking-wider text-white uppercase">
                                 {tryout.ageGroup}
                               </CardTitle>
                               <Badge className="bg-red-600/10 text-red-500 border-red-600/20 text-[10px] font-black uppercase">Active</Badge>
@@ -632,7 +599,7 @@ export default function DashboardPage() {
                             id="date"
                             type="date"
                             required
-                            value={newTryout.date}
+                            value={newTryout.date as string}
                             onChange={(e) => setNewTryout({ ...newTryout, date: e.target.value })}
                             className="bg-black border-zinc-800 text-white focus:border-red-600 h-12 rounded-xl"
                           />
@@ -676,7 +643,7 @@ export default function DashboardPage() {
                             id="maxCapacity"
                             type="number"
                             placeholder="Unlimited"
-                            value={newTryout.maxCapacity}
+                            value={newTryout.maxCapacity as string}
                             onChange={(e) => setNewTryout({ ...newTryout, maxCapacity: e.target.value })}
                             className="bg-black border-zinc-800 text-white focus:border-red-600 h-12 rounded-xl"
                           />
