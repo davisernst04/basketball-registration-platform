@@ -6,7 +6,7 @@ import { ServerActionResponse, Profile } from "@/types";
 
 export async function updateProfile(formData: {
   fullName: string;
-  username: string;
+  avatarUrl: string;
 }): Promise<ServerActionResponse<Profile>> {
   try {
     const supabase = await createClient();
@@ -16,17 +16,17 @@ export async function updateProfile(formData: {
       return { success: false, message: "Unauthorized" };
     }
 
-    const { fullName, username } = formData;
+    const { fullName, avatarUrl } = formData;
 
-    if (!fullName || !username) {
-      return { success: false, message: "Full name and username are required" };
+    if (!fullName) {
+      return { success: false, message: "Full name is required" };
     }
 
     const { data: profile, error } = await supabase
       .from("profiles")
       .update({
         full_name: fullName,
-        username: username,
+        avatar_url: avatarUrl,
         updated_at: new Date().toISOString(),
       })
       .eq("id", user.id)
@@ -34,9 +34,6 @@ export async function updateProfile(formData: {
       .single();
 
     if (error) {
-      if (error.code === "23505") {
-        return { success: false, message: "Username already taken" };
-      }
       throw error;
     }
 

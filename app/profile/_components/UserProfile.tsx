@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,24 +10,81 @@ import {
  CardHeader,
  CardTitle,
 } from "@/components/ui/card";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
-import { User as UserIcon, ShieldCheck, Mail, Loader2, Save } from "lucide-react";
+import { ShieldCheck, Mail, Loader2, Save, Upload } from "lucide-react";
 import { updateProfile } from "../actions";
 import { Profile } from "@/types";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { createClient } from "@/utils/supabase/client";
 
 interface UserProfileProps {
  profile: Profile;
 }
 
+const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB
+const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
+
 export default function UserProfile({ profile }: UserProfileProps) {
  const [loading, setLoading] = useState(false);
+ const [uploading, setUploading] = useState(false);
  const [formData, setFormData] = useState({
   fullName: profile.fullName || "",
-  username: profile.username || "",
+  avatarUrl: profile.avatarUrl || "",
  });
+ 
+ const fileInputRef = useRef<HTMLInputElement>(null);
+ const supabase = createClient();
+
+ const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const file = e.target.files?.[0];
+  if (!file) return;
+
+  // Validation
+  if (!ALLOWED_TYPES.includes(file.type)) {
+   toast.error("Invalid file type. Please upload a JPEG, PNG or WebP image.");
+   return;
+  }
+
+  if (file.size > MAX_FILE_SIZE) {
+   toast.error("File is too large. Maximum size is 2MB.");
+   return;
+  }
+
+  setUploading(true);
+
+  try {
+   const { data: { user } } = await supabase.auth.getUser();
+   if (!user) throw new Error("Not authenticated");
+
+   const fileExt = file.name.split(".").pop();
+   const filePath = `${user.id}/${Math.random()}.${fileExt}`;
+
+   // Upload the file
+   const { error: uploadError } = await supabase.storage
+    .from("avatars")
+    .upload(filePath, file, {
+     upsert: true,
+    });
+
+   if (uploadError) throw uploadError;
+
+   // Get public URL
+   const { data: { publicUrl } } = supabase.storage
+    .from("avatars")
+    .getPublicUrl(filePath);
+
+   setFormData(prev => ({ ...prev, avatarUrl: publicUrl }));
+   toast.success("Photo uploaded successfully!");
+  } catch (error: any) {
+   console.error("Upload error:", error);
+   toast.error(error.message || "Failed to upload photo");
+  } finally {
+   setUploading(false);
+   if (fileInputRef.current) fileInputRef.current.value = "";
+  }
+ };
 
  const handleSubmit = async (e: React.FormEvent) => {
   e.preventDefault();
@@ -47,96 +104,137 @@ export default function UserProfile({ profile }: UserProfileProps) {
   }
  };
 
+ const displayName = profile.fullName || (profile.role === "admin" ? "Admin" : "Parent");
+
  return (
   <motion.div
    initial={{ opacity: 0, y: 20 }}
    animate={{ opacity: 1, y: 0 }}
-   className="max-w-4xl mx-auto"
+   className="max-w-2xl mx-auto"
   >
    <Card className="bg-card border-border rounded-3xl overflow-hidden shadow-2xl">
-    <div className="h-32 bg-primary relative">
-     <div className="absolute -bottom-16 left-8 md:left-12">
-      <Avatar className="h-32 w-32 border-4 border-black shadow-xl">
-       <AvatarImage src={profile.avatarUrl || ""} />
-       <AvatarFallback className="bg-zinc-900 text-primary text-3xl font-impact">
-        {profile.email?.substring(0, 2).toUpperCase()}
-       </AvatarFallback>
-      </Avatar>
+    <div className="h-24 bg-primary relative">
+     <div className="absolute -bottom-12 left-8">
+      <div className="relative group">
+       <Avatar className="h-24 w-24 border-4 border-black shadow-xl">
+        <AvatarImage src={formData.avatarUrl || ""} />
+        <AvatarFallback className="bg-zinc-900 text-primary text-2xl font-impact">
+         {profile.email?.substring(0, 2).toUpperCase()}
+        </AvatarFallback>
+       </Avatar>
+       
+       <button
+        type="button"
+        onClick={() => fileInputRef.current?.click()}
+        disabled={uploading}
+        className="absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity rounded-full border-4 border-transparent"
+       >
+        {uploading ? (
+         <Loader2 className="animate-spin text-white" size={24} />
+        ) : (
+         <Upload className="text-white" size={24} />
+        )}
+       </button>
+      </div>
+      
+      <input
+       type="file"
+       ref={fileInputRef}
+       onChange={handleFileUpload}
+       accept="image/jpeg,image/png,image/webp"
+       className="hidden"
+      />
      </div>
     </div>
 
-    <CardHeader className="pt-20 pb-8 px-8 md:px-12 border-b border-border">
-     <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+    <CardHeader className="pt-16 pb-6 px-8 border-b border-border">
+     <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
       <div className="space-y-1">
-       <CardTitle className="text-4xl font-impact tracking-wider text-white uppercase">
-        {profile.fullName || "New Athlete"}
-       </CardTitle>
        <div className="flex items-center gap-3">
-        <span className="text-zinc-500 text-sm font-medium">@{profile.username || "athlete"}</span>
+        <CardTitle className="text-3xl font-impact tracking-wider text-white uppercase">
+         {displayName}
+        </CardTitle>
         <Badge className="bg-zinc-900 text-primary border-border px-3 py-0.5 font-bold tracking-widest text-[10px] uppercase">
          {profile.role}
         </Badge>
        </div>
+       <p className="text-zinc-500 text-[10px] font-black uppercase tracking-widest">
+        Click the photo to change it
+       </p>
       </div>
      </div>
     </CardHeader>
 
-    <CardContent className="p-8 md:p-12">
-     <form onSubmit={handleSubmit} className="space-y-10">
-      <div className="grid md:grid-cols-2 gap-8">
+    <CardContent className="p-8">
+     <form onSubmit={handleSubmit} className="space-y-8">
+      <AnimatePresence>
+       {uploading && (
+        <motion.div
+         initial={{ opacity: 0, height: 0 }}
+         animate={{ opacity: 1, height: "auto" }}
+         exit={{ opacity: 0, height: 0 }}
+         className="bg-primary/10 border border-primary/20 p-4 rounded-xl flex items-center gap-4 mb-4"
+        >
+         <Loader2 className="animate-spin text-primary" size={20} />
+         <div className="flex-1">
+          <p className="text-[10px] font-black uppercase text-primary tracking-widest mb-1">Uploading Image...</p>
+          <div className="h-1.5 w-full bg-zinc-900 rounded-full overflow-hidden">
+           <motion.div 
+            initial={{ width: 0 }}
+            animate={{ width: "100%" }}
+            transition={{ duration: 2, ease: "linear" }}
+            className="h-full bg-primary"
+           />
+          </div>
+         </div>
+        </motion.div>
+       )}
+      </AnimatePresence>
+
+      <div className="space-y-6">
        <div className="space-y-3">
         <Label htmlFor="fullName" className="text-zinc-500 font-bold uppercase text-[10px] tracking-[0.2em] ml-1">Full Name</Label>
         <Input
          id="fullName"
          value={formData.fullName}
          onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-         className="bg-black border-border text-white focus:border-primary h-14 rounded-2xl transition-all"
-         required
-        />
-       </div>
-
-       <div className="space-y-3">
-        <Label htmlFor="username" className="text-zinc-500 font-bold uppercase text-[10px] tracking-[0.2em] ml-1">Username</Label>
-        <Input
-         id="username"
-         value={formData.username}
-         onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-         className="bg-black border-border text-white focus:border-primary h-14 rounded-2xl transition-all"
+         placeholder="Enter your full name"
+         className="bg-black border-border text-white focus:border-primary h-12 rounded-xl transition-all"
          required
         />
        </div>
       </div>
 
-      <div className="grid md:grid-cols-2 gap-8 pt-4">
-       <div className="bg-black/30 p-6 rounded-2xl border border-border flex items-center gap-4">
-        <div className="bg-zinc-900 p-3 rounded-xl">
-         <Mail className="text-primary" size={20} />
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+       <div className="bg-black/30 p-4 rounded-xl border border-border flex items-center gap-3">
+        <div className="bg-zinc-900 p-2 rounded-lg">
+         <Mail className="text-primary" size={16} />
         </div>
-        <div>
-         <p className="text-zinc-500 text-[10px] uppercase font-black tracking-widest">Primary Email</p>
-         <p className="text-zinc-300 font-bold text-sm">{profile.email}</p>
+        <div className="overflow-hidden">
+         <p className="text-zinc-500 text-[10px] uppercase font-black tracking-widest">Email</p>
+         <p className="text-zinc-300 font-bold text-xs truncate">{profile.email}</p>
         </div>
        </div>
 
-       <div className="bg-black/30 p-6 rounded-2xl border border-border flex items-center gap-4">
-        <div className="bg-zinc-900 p-3 rounded-xl">
-         <ShieldCheck className="text-primary" size={20} />
+       <div className="bg-black/30 p-4 rounded-xl border border-border flex items-center gap-3">
+        <div className="bg-zinc-900 p-2 rounded-lg">
+         <ShieldCheck className="text-primary" size={16} />
         </div>
         <div>
-         <p className="text-zinc-500 text-[10px] uppercase font-black tracking-widest">Account Role</p>
-         <p className="text-zinc-300 font-bold text-sm uppercase">{profile.role} Access</p>
+         <p className="text-zinc-500 text-[10px] uppercase font-black tracking-widest">Role</p>
+         <p className="text-zinc-300 font-bold text-xs uppercase">{profile.role}</p>
         </div>
        </div>
       </div>
 
-      <div className="flex flex-col sm:flex-row gap-4 pt-6 border-t border-border">
+      <div className="pt-4">
        <Button
         type="submit"
-        disabled={loading}
-        className="flex-1 bg-primary text-white font-impact text-xl h-14 rounded-2xl gap-2 transition-all active:scale-95"
+        disabled={loading || uploading}
+        className="w-full bg-primary text-white font-impact text-lg h-12 rounded-xl gap-2 transition-all active:scale-95"
        >
-        {loading ? <Loader2 className="animate-spin" size={20} /> : <Save size={20} />}
-        SAVE CHANGES
+        {loading ? <Loader2 className="animate-spin" size={18} /> : <Save size={18} />}
+        SAVE PROFILE
        </Button>
       </div>
      </form>

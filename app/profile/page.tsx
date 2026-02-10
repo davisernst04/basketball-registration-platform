@@ -15,7 +15,7 @@ export default function ProfilePage() {
       <Navbar />
       <Toaster position="top-center" richColors />
 
-      <div className="container mx-auto px-4 pt-36 pb-20 relative z-10">
+      <div className="container mx-auto px-4 pt-32 pb-20 relative z-10">
         <Suspense fallback={
           <div className="max-w-4xl mx-auto p-12 flex flex-col items-center justify-center space-y-4 bg-card border border-border rounded-3xl mt-12">
             <Loader2 className="animate-spin text-primary" size={48} />
