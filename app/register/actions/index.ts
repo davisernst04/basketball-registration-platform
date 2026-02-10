@@ -3,9 +3,21 @@
 import { createClient } from "@/utils/supabase/server";
 import { revalidatePath } from "next/cache";
 import { RegistrationFormData, ServerActionResponse, Registration } from "@/types";
+import { registrationSchema } from "@/lib/validations";
 
 export async function createRegistration(formData: RegistrationFormData): Promise<ServerActionResponse<Registration>> {
   try {
+    // Validate input with Zod
+    const validatedFields = registrationSchema.safeParse(formData);
+
+    if (!validatedFields.success) {
+      return { 
+        success: false, 
+        message: "Validation failed", 
+        error: validatedFields.error.errors.map(e => e.message).join(", ") 
+      };
+    }
+
     const supabase = await createClient();
     const {
       parentName,
@@ -18,21 +30,7 @@ export async function createRegistration(formData: RegistrationFormData): Promis
       emergencyContact,
       emergencyPhone,
       tryoutId,
-    } = formData;
-
-    if (
-      !parentName ||
-      !parentEmail ||
-      !parentPhone ||
-      !playerName ||
-      !playerAge ||
-      !playerGrade ||
-      !emergencyContact ||
-      !emergencyPhone ||
-      !tryoutId
-    ) {
-      return { success: false, message: "Missing required fields" };
-    }
+    } = validatedFields.data;
 
     // Check capacity using Supabase
     const { data: tryout, error: tryoutError } = await supabase

@@ -3,9 +3,21 @@
 import { createClient } from "@/utils/supabase/server";
 import { revalidatePath } from "next/cache";
 import { TryoutFormData, ServerActionResponse, Tryout } from "@/types";
+import { tryoutSchema } from "@/lib/validations";
 
 export async function createTryout(formData: TryoutFormData): Promise<ServerActionResponse<Tryout>> {
   try {
+    // Validate input with Zod
+    const validatedFields = tryoutSchema.safeParse(formData);
+
+    if (!validatedFields.success) {
+      return { 
+        success: false, 
+        message: "Validation failed", 
+        error: validatedFields.error.errors.map(e => e.message).join(", ") 
+      };
+    }
+
     const supabase = await createClient();
     
     const { data: { user } } = await supabase.auth.getUser();
@@ -23,21 +35,17 @@ export async function createTryout(formData: TryoutFormData): Promise<ServerActi
       return { success: false, message: "Forbidden: Admin access required" };
     }
 
-    const { location, date, startTime, endTime, ageGroup, maxCapacity, notes } = formData;
-
-    if (!location || !date || !startTime || !endTime || !ageGroup) {
-      return { success: false, message: "Missing required fields" };
-    }
+    const { location, date, startTime, endTime, ageGroup, maxCapacity, notes } = validatedFields.data;
 
     const { data: tryout, error: createError } = await supabase
       .from("tryout")
       .insert({
         location,
-        date: new Date(date).toISOString(),
+        date: date.toISOString(),
         start_time: startTime,
         end_time: endTime,
         age_group: ageGroup,
-        max_capacity: maxCapacity ? parseInt(maxCapacity.toString()) : null,
+        max_capacity: maxCapacity || null,
         notes,
       })
       .select()
@@ -74,6 +82,22 @@ export async function createTryout(formData: TryoutFormData): Promise<ServerActi
 
 export async function updateTryout(formData: TryoutFormData): Promise<ServerActionResponse<Tryout>> {
   try {
+    const { id, ...rest } = formData;
+    if (!id) {
+      return { success: false, message: "Tryout ID is required" };
+    }
+
+    // Validate input with Zod
+    const validatedFields = tryoutSchema.safeParse(rest);
+
+    if (!validatedFields.success) {
+      return { 
+        success: false, 
+        message: "Validation failed", 
+        error: validatedFields.error.errors.map(e => e.message).join(", ") 
+      };
+    }
+
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return { success: false, message: "Unauthorized" };
@@ -88,21 +112,17 @@ export async function updateTryout(formData: TryoutFormData): Promise<ServerActi
       return { success: false, message: "Forbidden" };
     }
 
-    const { id, location, date, startTime, endTime, ageGroup, maxCapacity, notes } = formData;
-
-    if (!id) {
-      return { success: false, message: "Tryout ID is required" };
-    }
+    const { location, date, startTime, endTime, ageGroup, maxCapacity, notes } = validatedFields.data;
 
     const { data: tryout, error: updateError } = await supabase
       .from("tryout")
       .update({
         location,
-        date: new Date(date).toISOString(),
+        date: date.toISOString(),
         start_time: startTime,
         end_time: endTime,
         age_group: ageGroup,
-        max_capacity: maxCapacity ? parseInt(maxCapacity.toString()) : null,
+        max_capacity: maxCapacity || null,
         notes,
         updated_at: new Date().toISOString(),
       })

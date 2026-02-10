@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
@@ -30,7 +30,8 @@ import {
   Phone,
   User as UserIcon,
   AlertCircle,
-  Filter
+  Filter,
+  RefreshCw
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Toaster, toast } from "sonner";
@@ -54,31 +55,11 @@ interface ExtendedTryout extends Tryout {
   };
 }
 
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.1
-    }
-  }
-};
-
-const itemVariants = {
-  hidden: { y: 20, opacity: 0 },
-  visible: {
-    y: 0,
-    opacity: 1
-  }
-};
-
 export default function DashboardPage() {
   const [registrations, setRegistrations] = useState<ExtendedRegistration[]>([]);
   const [tryouts, setTryouts] = useState<ExtendedTryout[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<
-    "registrations" | "tryouts" | "create"
-  >("registrations");
+  const [activeTab, setActiveTab] = useState<"schedule" | "create">("schedule");
   const [selectedTryoutId, setSelectedTryoutId] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [editingTryout, setEditingTryout] = useState<ExtendedTryout | null>(null);
@@ -93,34 +74,32 @@ export default function DashboardPage() {
     notes: "",
   });
 
-  useEffect(() => {
-    loadData();
-  }, []);
-
-  const loadData = async () => {
-    setLoading(true);
+  const loadData = useCallback(async (silent = false) => {
+    if (!silent) setLoading(true);
     try {
       const [regRes, tryRes] = await Promise.all([
-        fetch("/api/registrations"),
-        fetch("/api/tryouts"),
+        fetch("/api/registrations", { cache: 'no-store' }),
+        fetch("/api/tryouts", { cache: 'no-store' }),
       ]);
 
-      if (regRes.ok) {
-        const regData = await regRes.json();
-        setRegistrations(regData);
-      }
+      const [regData, tryData] = await Promise.all([
+        regRes.ok ? regRes.json() : [],
+        tryRes.ok ? tryRes.json() : [],
+      ]);
 
-      if (tryRes.ok) {
-        const tryData = await tryRes.json();
-        setTryouts(tryData);
-      }
+      setRegistrations(regData);
+      setTryouts(tryData);
     } catch (error) {
       console.error("Error loading data:", error);
-      toast.error("Failed to load dashboard data");
+      if (!silent) toast.error("Failed to load dashboard data");
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
 
   const handleCreateTryout = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -143,7 +122,7 @@ export default function DashboardPage() {
           notes: "",
         });
         loadData();
-        setActiveTab("tryouts");
+        setActiveTab("schedule");
       } else {
         toast.error(result.message || "Failed to create tryout session");
       }
@@ -177,7 +156,7 @@ export default function DashboardPage() {
           notes: "",
         });
         loadData();
-        setActiveTab("tryouts");
+        setActiveTab("schedule");
       } else {
         toast.error(result.message || "Failed to update tryout session");
       }
@@ -237,7 +216,7 @@ export default function DashboardPage() {
       maxCapacity: "",
       notes: "",
     });
-    setActiveTab("tryouts");
+    setActiveTab("schedule");
   };
 
   const selectedTryout = tryouts.find(t => t.id === selectedTryoutId);
@@ -293,19 +272,18 @@ export default function DashboardPage() {
           <div className="flex flex-wrap items-center justify-between gap-4 border-b border-zinc-900 pb-2">
             <div className="flex gap-2">
               {[
-                { id: "registrations", label: "Players", icon: Users },
-                { id: "tryouts", label: "Schedule", icon: Calendar },
+                { id: "schedule", label: "Schedule", icon: Calendar },
                 { id: "create", label: editingTryout ? "Edit" : "New Session", icon: PlusCircle },
               ].map((tab) => (
                 <button
                   key={tab.id}
                   onClick={() => {
                     setActiveTab(tab.id as any);
-                    if (tab.id !== "registrations") setSelectedTryoutId(null);
+                    if (tab.id === "schedule") setSelectedTryoutId(null);
                   }}
                   className={`flex items-center gap-2 px-6 py-3 rounded-t-xl font-bold uppercase tracking-wider text-[10px] transition-all ${
                     activeTab === tab.id
-                      ? "bg-red-600 text-white shadow-[0_-4px_15px_rgba(220,38,38,0.2)]"
+                      ? "bg-red-600 text-white shadow-[0_-4px_15_rgba(220,38,38,0.2)]"
                       : "text-zinc-500 hover:text-zinc-300 hover:bg-zinc-900"
                   }`}
                 >
@@ -314,250 +292,228 @@ export default function DashboardPage() {
                 </button>
               ))}
             </div>
+
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={() => loadData()}
+              className="text-zinc-500 hover:text-white mb-2 gap-2"
+            >
+              <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
+              <span className="text-[10px] font-bold uppercase">Refresh Data</span>
+            </Button>
           </div>
 
           {/* Tab Content */}
           <AnimatePresence mode="wait">
-            {activeTab === "registrations" && (
+            {activeTab === "schedule" && !selectedTryoutId && (
               <motion.div
-                key="registrations"
-                variants={containerVariants}
-                initial="hidden"
-                animate="visible"
-                exit="hidden"
+                key="schedule-list"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
                 className="space-y-6"
               >
-                {!selectedTryoutId ? (
-                  <div className="grid md:grid-cols-3 gap-6">
-                    <div className="col-span-full mb-2">
-                      <h2 className="text-2xl font-impact tracking-wide uppercase flex items-center gap-3">
-                        <Filter className="text-red-600" size={20} />
-                        Select Tryout to View Players
-                      </h2>
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {loading ? (
+                    [1, 2, 3].map(i => (
+                      <div key={i} className="h-64 bg-zinc-900 rounded-xl animate-pulse border border-zinc-800" />
+                    ))
+                  ) : tryouts.length === 0 ? (
+                    <div className="col-span-full py-20 text-center bg-zinc-950 rounded-2xl border border-zinc-800 border-dashed">
+                      <Calendar className="mx-auto text-zinc-800 mb-4" size={48} />
+                      <p className="text-zinc-500 uppercase font-bold tracking-widest text-sm">No tryout sessions scheduled.</p>
                     </div>
-                    {tryouts.map((tryout) => (
-                      <motion.div key={tryout.id} variants={itemVariants}>
-                        <Card 
-                          className="bg-zinc-950 border-zinc-800 cursor-pointer transition-colors shadow-md"
-                          onClick={() => setSelectedTryoutId(tryout.id)}
-                        >
-                          <CardHeader className="pb-4">
+                  ) : (
+                    tryouts.map((tryout, index) => (
+                      <motion.div 
+                        key={tryout.id} 
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: index * 0.1 }}
+                      >
+                        <Card className="bg-zinc-950 border-zinc-800 transition-colors h-full flex flex-col shadow-md">
+                          <CardHeader className="border-b border-zinc-900 pb-4">
                             <div className="flex justify-between items-start">
-                              <CardTitle className="text-xl font-impact tracking-wider text-white uppercase">
-                                {tryout.ageGroup}
-                              </CardTitle>
-                              <Badge className="bg-zinc-900 text-zinc-400 border-zinc-800">
-                                {tryout._count.registrations} Players
-                              </Badge>
+                              <div className="space-y-1">
+                                <CardTitle className="text-2xl font-impact tracking-wider text-white uppercase">
+                                  {tryout.ageGroup}
+                                </CardTitle>
+                                <Badge className="bg-red-600/10 text-red-500 border-red-600/20 text-[10px] font-black uppercase">Active</Badge>
+                              </div>
+                              <div className="flex gap-1">
+                                <button 
+                                  onClick={(e) => { e.stopPropagation(); startEditingTryout(tryout); }}
+                                  className="p-2 text-zinc-500 hover:text-white hover:bg-zinc-800 rounded-lg transition-colors"
+                                  title="Edit Tryout"
+                                >
+                                  <Edit2 size={14} />
+                                </button>
+                                <button 
+                                  onClick={(e) => { e.stopPropagation(); handleDeleteTryout(tryout.id); }}
+                                  className="p-2 text-zinc-500 hover:text-red-500 hover:bg-red-950/20 rounded-lg transition-colors"
+                                  title="Delete Tryout"
+                                >
+                                  <Trash2 size={14} />
+                                </button>
+                              </div>
                             </div>
                           </CardHeader>
-                          <CardContent className="space-y-4">
-                            <div className="flex items-center gap-2 text-zinc-500 text-xs font-medium">
-                              <Calendar size={14} className="text-red-600" />
-                              {new Date(tryout.date).toLocaleDateString()}
+                          <CardContent className="p-6 flex-1 flex flex-col justify-between space-y-6">
+                            <div className="space-y-4">
+                              <div className="flex items-center gap-3 text-zinc-400">
+                                <Calendar size={16} className="text-red-600" />
+                                <span className="text-sm font-bold text-white uppercase">{new Date(tryout.date).toLocaleDateString()}</span>
+                              </div>
+                              <div className="flex items-center gap-3 text-zinc-400">
+                                <Clock size={16} className="text-red-600" />
+                                <span className="text-sm font-bold text-white uppercase">{tryout.startTime} - {tryout.endTime}</span>
+                              </div>
+                              <div className="flex items-center gap-3 text-zinc-400">
+                                <MapPin size={16} className="text-red-600" />
+                                <span className="text-sm font-bold text-zinc-300 uppercase line-clamp-1">{tryout.location}</span>
+                              </div>
                             </div>
-                            <div className="flex items-center justify-between pt-2 border-t border-zinc-900">
-                              <span className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest">Manage List</span>
-                              <ChevronRight className="text-zinc-700" size={18} />
+
+                            <div className="pt-4 border-t border-zinc-900">
+                              <div className="flex items-center justify-between mb-2">
+                                <span className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest">Roster Fill</span>
+                                <span className="text-[10px] font-black text-zinc-400 uppercase">
+                                  {tryout._count.registrations} / {tryout.maxCapacity || "∞"}
+                                </span>
+                              </div>
+                              <div className="w-full h-1.5 bg-zinc-900 rounded-full overflow-hidden">
+                                <motion.div 
+                                  initial={{ width: 0 }}
+                                  animate={{ width: `${Math.min(100, (tryout._count.registrations / (Number(tryout.maxCapacity) || 100)) * 100)}%` }}
+                                  className="h-full bg-red-600 shadow-[0_0_10px_rgba(220,38,38,0.5)]" 
+                                />
+                              </div>
+                              <Button 
+                                onClick={() => setSelectedTryoutId(tryout.id)}
+                                className="w-full mt-6 bg-white hover:bg-red-600 text-black hover:text-white font-bold h-10 rounded-lg text-xs uppercase tracking-widest transition-all"
+                              >
+                                View Player List
+                              </Button>
                             </div>
                           </CardContent>
                         </Card>
                       </motion.div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="space-y-6">
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                      <div className="flex items-center gap-4">
-                        <Button 
-                          variant="outline" 
-                          size="icon" 
-                          onClick={() => setSelectedTryoutId(null)}
-                          className="rounded-full border-zinc-800 text-zinc-400 hover:text-white hover:bg-zinc-900"
-                        >
-                          <ArrowLeft size={18} />
-                        </Button>
-                        <div>
-                          <h2 className="text-2xl font-impact tracking-wide uppercase text-white">
-                            {selectedTryout?.ageGroup} <span className="text-red-600">Roster</span>
-                          </h2>
-                          <p className="text-zinc-500 text-xs uppercase tracking-widest font-bold">
-                            {selectedTryout?.location} • {new Date(selectedTryout?.date || '').toLocaleDateString()}
-                          </p>
-                        </div>
-                      </div>
-                      
-                      <div className="relative w-full md:w-80">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" size={16} />
-                        <Input
-                          placeholder="Search players or parents..."
-                          value={searchTerm}
-                          onChange={(e) => setSearchTerm(e.target.value)}
-                          className="bg-zinc-950 border-zinc-800 pl-10 focus:border-red-600 h-10 w-full rounded-full"
-                        />
-                      </div>
-                    </div>
-
-                    {loading ? (
-                      <div className="space-y-4">
-                        {[1, 2, 3].map(i => <div key={i} className="h-24 bg-zinc-900 rounded-xl animate-pulse border border-zinc-800" />)}
-                      </div>
-                    ) : filteredRegistrations.length === 0 ? (
-                      <div className="py-20 text-center bg-zinc-950 rounded-2xl border border-zinc-800 border-dashed">
-                        <Users className="mx-auto text-zinc-800 mb-4" size={48} />
-                        <p className="text-zinc-500 uppercase font-bold tracking-widest text-sm">No players registered for this session yet.</p>
-                      </div>
-                    ) : (
-                      <div className="grid gap-4">
-                        {filteredRegistrations.map((reg) => (
-                          <motion.div key={reg.id} variants={itemVariants}>
-                            <Card className="bg-zinc-950 border-zinc-800 hover:border-zinc-700 transition-all overflow-hidden shadow-sm">
-                              <div className="flex flex-col lg:flex-row items-stretch">
-                                <div className="p-6 lg:w-1/4 border-b lg:border-b-0 lg:border-r border-zinc-900 flex flex-col justify-center bg-gradient-to-br from-zinc-900/50 to-transparent">
-                                  <span className="text-[10px] font-bold text-red-600 uppercase tracking-widest mb-1">Player</span>
-                                  <h3 className="text-xl font-impact uppercase text-white">{reg.playerName}</h3>
-                                  <div className="flex gap-2 mt-2">
-                                    <Badge variant="secondary" className="bg-zinc-900 text-zinc-400 border-zinc-800 text-[10px] uppercase font-bold tracking-tighter">{reg.playerGrade}</Badge>
-                                    <Badge variant="secondary" className="bg-zinc-900 text-zinc-400 border-zinc-800 text-[10px] uppercase font-bold tracking-tighter">{reg.playerAge} Yrs</Badge>
-                                  </div>
-                                </div>
-                                
-                                <div className="p-6 lg:w-2/4 grid grid-cols-1 sm:grid-cols-2 gap-6">
-                                  <div className="space-y-2">
-                                    <span className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest flex items-center gap-2">
-                                      <UserIcon size={10} /> Parent / Guardian
-                                    </span>
-                                    <p className="text-sm font-bold text-zinc-300">{reg.parentName}</p>
-                                    <div className="space-y-1">
-                                      <a href={`mailto:${reg.parentEmail}`} className="text-xs text-zinc-500 hover:text-red-500 flex items-center gap-2 transition-colors">
-                                        <Mail size={12} /> {reg.parentEmail}
-                                      </a>
-                                      <a href={`tel:${reg.parentPhone}`} className="text-xs text-zinc-500 hover:text-red-500 flex items-center gap-2 transition-colors">
-                                        <Phone size={12} /> {reg.parentPhone}
-                                      </a>
-                                    </div>
-                                  </div>
-                                  <div className="space-y-2">
-                                    <span className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest flex items-center gap-2">
-                                      <AlertCircle size={10} /> Emergency Contact
-                                    </span>
-                                    <p className="text-sm font-bold text-zinc-300">{reg.emergencyContact}</p>
-                                    <a href={`tel:${reg.emergencyPhone}`} className="text-xs text-zinc-500 hover:text-red-500 flex items-center gap-2 transition-colors">
-                                      <Phone size={12} /> {reg.emergencyPhone}
-                                    </a>
-                                  </div>
-                                </div>
-
-                                <div className="p-6 lg:w-1/4 bg-zinc-900/20 flex flex-col justify-center">
-                                  {reg.medicalInfo ? (
-                                    <div className="space-y-1">
-                                      <span className="text-[10px] font-bold text-yellow-600/70 uppercase tracking-widest">Medical Info</span>
-                                      <p className="text-xs text-zinc-500 line-clamp-3 italic">&quot;{reg.medicalInfo}&quot;</p>
-                                    </div>
-                                  ) : (
-                                    <span className="text-[10px] font-bold text-zinc-700 uppercase tracking-widest">No Medical Notes</span>
-                                  )}
-                                </div>
-                              </div>
-                            </Card>
-                          </motion.div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                )}
+                    ))
+                  )}
+                </div>
               </motion.div>
             )}
 
-            {activeTab === "tryouts" && (
+            {activeTab === "schedule" && selectedTryoutId && (
               <motion.div
-                key="tryouts"
-                variants={containerVariants}
-                initial="hidden"
-                animate="visible"
-                exit="hidden"
-                className="grid md:grid-cols-2 lg:grid-cols-3 gap-6"
+                key="schedule-roster"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                className="space-y-6"
               >
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                  <div className="flex items-center gap-4">
+                    <Button 
+                      variant="outline" 
+                      size="icon" 
+                      onClick={() => setSelectedTryoutId(null)}
+                      className="rounded-full border-zinc-800 text-zinc-400 hover:text-white hover:bg-zinc-900"
+                    >
+                      <ArrowLeft size={18} />
+                    </Button>
+                    <div>
+                      <h2 className="text-2xl font-impact tracking-wide uppercase text-white">
+                        {selectedTryout?.ageGroup} <span className="text-red-600">Roster</span>
+                      </h2>
+                      <p className="text-zinc-500 text-xs uppercase tracking-widest font-bold">
+                        {selectedTryout?.location} • {new Date(selectedTryout?.date || '').toLocaleDateString()}
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <div className="relative w-full md:w-80">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" size={16} />
+                    <Input
+                      placeholder="Search players or parents..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="bg-zinc-950 border-zinc-800 pl-10 focus:border-red-600 h-10 w-full rounded-full"
+                    />
+                  </div>
+                </div>
+
                 {loading ? (
-                  [1, 2, 3].map(i => <div key={i} className="h-64 bg-zinc-900 rounded-xl animate-pulse border border-zinc-800" />)
-                ) : tryouts.length === 0 ? (
-                  <div className="col-span-full py-20 text-center bg-zinc-950 rounded-2xl border border-zinc-800 border-dashed">
-                    <Calendar className="mx-auto text-zinc-800 mb-4" size={48} />
-                    <p className="text-zinc-500 uppercase font-bold tracking-widest text-sm">No tryout sessions scheduled.</p>
+                  <div className="space-y-4">
+                    {[1, 2, 3].map(i => <div key={i} className="h-24 bg-zinc-900 rounded-xl animate-pulse border border-zinc-800" />)}
+                  </div>
+                ) : filteredRegistrations.length === 0 ? (
+                  <div className="py-20 text-center bg-zinc-950 rounded-2xl border border-zinc-800 border-dashed">
+                    <Users className="mx-auto text-zinc-800 mb-4" size={48} />
+                    <p className="text-zinc-500 uppercase font-bold tracking-widest text-sm">No players registered for this session yet.</p>
                   </div>
                 ) : (
-                  tryouts.map((tryout) => (
-                    <motion.div key={tryout.id} variants={itemVariants}>
-                      <Card className="bg-zinc-950 border-zinc-800 transition-colors h-full flex flex-col shadow-md">
-                        <CardHeader className="border-b border-zinc-900 pb-4">
-                          <div className="flex justify-between items-start">
-                            <div className="space-y-1">
-                              <CardTitle className="text-2xl font-impact tracking-wider text-white uppercase">
-                                {tryout.ageGroup}
-                              </CardTitle>
-                              <Badge className="bg-red-600/10 text-red-500 border-red-600/20 text-[10px] font-black uppercase">Active</Badge>
+                  <div className="grid gap-4">
+                    {filteredRegistrations.map((reg, index) => (
+                      <motion.div 
+                        key={reg.id} 
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: index * 0.05 }}
+                      >
+                        <Card className="bg-zinc-950 border-zinc-800 hover:border-zinc-700 transition-all overflow-hidden shadow-sm">
+                          <div className="flex flex-col lg:flex-row items-stretch">
+                            <div className="p-6 lg:w-1/4 border-b lg:border-b-0 lg:border-r border-zinc-900 flex flex-col justify-center bg-gradient-to-br from-zinc-900/50 to-transparent">
+                              <span className="text-[10px] font-bold text-red-600 uppercase tracking-widest mb-1">Player</span>
+                              <h3 className="text-xl font-impact uppercase text-white">{reg.playerName}</h3>
+                              <div className="flex gap-2 mt-2">
+                                <Badge variant="secondary" className="bg-zinc-900 text-zinc-400 border-zinc-800 text-[10px] uppercase font-bold tracking-tighter">{reg.playerGrade}</Badge>
+                                <Badge variant="secondary" className="bg-zinc-900 text-zinc-400 border-zinc-800 text-[10px] uppercase font-bold tracking-tighter">{reg.playerAge} Yrs</Badge>
+                              </div>
                             </div>
-                            <div className="flex gap-1">
-                              <Button 
-                                onClick={(e) => { e.stopPropagation(); startEditingTryout(tryout); }}
-                                variant="ghost" 
-                                size="icon" 
-                                className="h-8 w-8 text-zinc-500 hover:text-white hover:bg-zinc-800"
-                              >
-                                <Edit2 size={14} />
-                              </Button>
-                              <Button 
-                                onClick={(e) => { e.stopPropagation(); handleDeleteTryout(tryout.id); }}
-                                variant="ghost" 
-                                size="icon" 
-                                className="h-8 w-8 text-zinc-500 hover:text-red-500 hover:bg-red-950/20"
-                              >
-                                <Trash2 size={14} />
-                              </Button>
+                            
+                            <div className="p-6 lg:w-2/4 grid grid-cols-1 sm:grid-cols-2 gap-6">
+                              <div className="space-y-2">
+                                <span className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest flex items-center gap-2">
+                                  <UserIcon size={10} /> Parent / Guardian
+                                </span>
+                                <p className="text-sm font-bold text-zinc-300">{reg.parentName}</p>
+                                <div className="space-y-1">
+                                  <a href={`mailto:${reg.parentEmail}`} className="text-xs text-zinc-500 hover:text-red-500 flex items-center gap-2 transition-colors">
+                                    <Mail size={12} /> {reg.parentEmail}
+                                  </a>
+                                  <a href={`tel:${reg.parentPhone}`} className="text-xs text-zinc-500 hover:text-red-500 flex items-center gap-2 transition-colors">
+                                    <Phone size={12} /> {reg.parentPhone}
+                                  </a>
+                                </div>
+                              </div>
+                              <div className="space-y-2">
+                                <span className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest flex items-center gap-2">
+                                  <AlertCircle size={10} /> Emergency Contact
+                                </span>
+                                <p className="text-sm font-bold text-zinc-300">{reg.emergencyContact}</p>
+                                <a href={`tel:${reg.emergencyPhone}`} className="text-xs text-zinc-500 hover:text-red-500 flex items-center gap-2 transition-colors">
+                                  <Phone size={12} /> {reg.emergencyPhone}
+                                </a>
+                              </div>
                             </div>
-                          </div>
-                        </CardHeader>
-                        <CardContent className="p-6 flex-1 flex flex-col justify-between space-y-6">
-                          <div className="space-y-4">
-                            <div className="flex items-center gap-3 text-zinc-400">
-                              <Calendar size={16} className="text-red-600" />
-                              <span className="text-sm font-bold text-white uppercase">{new Date(tryout.date).toLocaleDateString()}</span>
-                            </div>
-                            <div className="flex items-center gap-3 text-zinc-400">
-                              <Clock size={16} className="text-red-600" />
-                              <span className="text-sm font-bold text-white uppercase">{tryout.startTime} - {tryout.endTime}</span>
-                            </div>
-                            <div className="flex items-center gap-3 text-zinc-400">
-                              <MapPin size={16} className="text-red-600" />
-                              <span className="text-sm font-bold text-zinc-300 uppercase line-clamp-1">{tryout.location}</span>
-                            </div>
-                          </div>
 
-                          <div className="pt-4 border-t border-zinc-900">
-                            <div className="flex items-center justify-between mb-2">
-                              <span className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest">Roster Fill</span>
-                              <span className="text-[10px] font-black text-zinc-400 uppercase">
-                                {tryout._count.registrations} / {tryout.maxCapacity || "∞"}
-                              </span>
+                            <div className="p-6 lg:w-1/4 bg-zinc-900/20 flex flex-col justify-center">
+                              {reg.medicalInfo ? (
+                                <div className="space-y-1">
+                                  <span className="text-[10px] font-bold text-yellow-600/70 uppercase tracking-widest">Medical Info</span>
+                                  <p className="text-xs text-zinc-500 line-clamp-3 italic">&quot;{reg.medicalInfo}&quot;</p>
+                                </div>
+                              ) : (
+                                <span className="text-[10px] font-bold text-zinc-700 uppercase tracking-widest">No Medical Notes</span>
+                              )}
                             </div>
-                            <div className="w-full h-1.5 bg-zinc-900 rounded-full overflow-hidden">
-                              <motion.div 
-                                initial={{ width: 0 }}
-                                animate={{ width: `${Math.min(100, (tryout._count.registrations / (tryout.maxCapacity || 100)) * 100)}%` }}
-                                className="h-full bg-red-600 shadow-[0_0_10px_rgba(220,38,38,0.5)]" 
-                              />
-                            </div>
-                            <Button 
-                              onClick={() => { setSelectedTryoutId(tryout.id); setActiveTab("registrations"); }}
-                              className="w-full mt-6 bg-white hover:bg-red-600 text-black hover:text-white font-bold h-10 rounded-lg text-xs uppercase tracking-widest transition-all"
-                            >
-                              View Player List
-                            </Button>
                           </div>
-                        </CardContent>
-                      </Card>
-                    </motion.div>
-                  ))
+                        </Card>
+                      </motion.div>
+                    ))}
+                  </div>
                 )}
               </motion.div>
             )}

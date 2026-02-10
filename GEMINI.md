@@ -1,7 +1,7 @@
 # Personas
-- For Database/Structure: Refer to @.gemini/ARCHITECT.md
-- For UI/UX/Animations: Refer to @.gemini/DESIGNER.md
-- For Auth/Security: Refer to @.gemini/SECURITY.md
+- For Database/Structure: Refer to @~/.gemini/ARCHITECT.md
+- For UI/UX/Animations: Refer to @~/.gemini/DESIGNER.md
+- For Auth/Security: Refer to @~/.gemini/SECURITY.md
 
 # GEMINI.md - Shadow Basketball Platform Context
 

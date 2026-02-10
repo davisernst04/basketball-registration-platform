@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
+import { connection } from "next/server";
 import { createPublicClient } from "@/utils/supabase/server";
 
 export async function GET() {
+  await connection();
   try {
     const supabase = createPublicClient();
     const { data: tryouts, error } = await supabase
