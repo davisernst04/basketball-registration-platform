@@ -46,7 +46,7 @@ export default async function TryoutsPage() {
 
       {/* Tryouts Header */}
       <div className="relative pt-40 pb-20 bg-black overflow-hidden">
-        <div className="container mx-auto px-6 relative z-10">
+        <div className="mx-auto px-6 md:px-16 relative z-10">
           <div className="text-center space-y-6">
             <Badge className="bg-primary  text-white font-bold px-6 py-1.5 rounded-full tracking-widest text-xs">SEASON 2026</Badge>
             <h1 className="text-6xl md:text-8xl font-impact tracking-tighter uppercase leading-[0.9]">
@@ -61,11 +61,11 @@ export default async function TryoutsPage() {
       </div>
 
       {/* Tryouts Grid */}
-      <div className="container mx-auto px-6 py-24 relative">
+      <div className="mx-auto px-6 md:px-16 py-24 relative">
         <div className="absolute top-0 left-1/4 w-px h-full bg-zinc-900/50 -z-10 hidden lg:block"></div>
         <div className="absolute top-0 right-1/4 w-px h-full bg-zinc-900/50 -z-10 hidden lg:block"></div>
 
-        <div className="max-w-6xl mx-auto">
+        <div className="mx-auto">
           {tryouts.length === 0 ? (
             <div className="bg-black border border-border border-dashed py-32 text-center rounded-[3rem]">
               <div className="space-y-6">
@@ -84,8 +84,8 @@ export default async function TryoutsPage() {
 
       {/* Info Section */}
       <section className="bg-black py-32 border-t border-zinc-900 relative overflow-hidden">
-        <div className="container mx-auto px-6 relative z-10">
-          <div className="max-w-5xl mx-auto">
+        <div className="mx-auto px-6 md:px-16 relative z-10">
+          <div className="mx-auto">
             <div className="grid md:grid-cols-2 gap-16">
               <div className="space-y-8 p-10 bg-black rounded-3xl border border-border">
                 <div className="bg-zinc-900 w-16 h-16 flex items-center justify-center rounded-2xl">

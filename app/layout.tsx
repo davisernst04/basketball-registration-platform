@@ -30,9 +30,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="bg-black">
+    <html lang="en">
       <body
-        className={`${impactFont.variable} ${inter.variable} font-sans antialiased bg-black`}
+        className={`${impactFont.variable} ${inter.variable} font-sans antialiased`}
       >
         {children}
       </body>

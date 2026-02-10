@@ -99,11 +99,11 @@ export default function ParentDashboard() {
    <Navbar />
    <Toaster position="top-center" richColors />
    
-   <main className="container mx-auto px-4 pt-32 pb-12">
+   <main className="mx-auto px-6 md:px-16 pt-32 pb-12">
     <motion.div 
      initial={{ opacity: 0, y: 20 }}
      animate={{ opacity: 1, y: 0 }}
-     className="max-w-6xl mx-auto space-y-8"
+     className="space-y-8"
     >
      {/* Header Card */}
      <div className="relative overflow-hidden bg-card p-8 md:p-12 rounded-3xl border border-border shadow-2xl">

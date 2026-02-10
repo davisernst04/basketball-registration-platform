@@ -236,11 +236,11 @@ export default function DashboardPage() {
    <Navbar />
    <Toaster position="top-center" richColors />
 
-   <main className="container mx-auto px-4 pt-28 pb-12">
+   <main className="mx-auto px-6 md:px-16 pt-28 pb-12">
     <motion.div 
      initial={{ opacity: 0, y: -20 }}
      animate={{ opacity: 1, y: 0 }}
-     className="max-w-7xl mx-auto space-y-8"
+     className="space-y-8"
     >
      {/* Admin Header & Stats */}
      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">

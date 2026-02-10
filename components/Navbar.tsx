@@ -168,7 +168,7 @@ export default function Navbar() {
                 >
                   <Button
                     onClick={() => router.push("/sign-in")}
-                    variant="ghost"
+                    variant="outline"
                     size="sm"
                     className="text-zinc-400 text-xs uppercase font-bold tracking-widest px-4"
                   >
@@ -177,7 +177,7 @@ export default function Navbar() {
                   <Button
                     onClick={() => router.push("/sign-up")}
                     size="sm"
-                    className="bg-primary text-white text-xs uppercase font-bold tracking-widest px-6 rounded-none"
+                    className="bg-primary text-white text-xs uppercase font-bold tracking-widest px-6"
                   >
                     Sign Up
                   </Button>
