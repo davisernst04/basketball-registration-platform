@@ -96,22 +96,14 @@ export default function Home() {
 
             <motion.div
               variants={fadeInUp}
-              className="flex flex-col sm:flex-row gap-4 pt-4 w-full"
+              className="pt-4 w-full"
             >
               <Button
                 onClick={() => router.push("/tryouts")}
                 size="lg"
-                className="font-impact bg-primary text-white text-lg md:text-xl px-10 py-8 w-full sm:w-auto rounded-xl"
+                className="font-impact bg-primary text-white text-xl md:text-2xl px-10 py-10 w-full rounded-2xl shadow-xl transition-all active:scale-[0.98]"
               >
-                REGISTER NOW
-              </Button>
-              <Button
-                onClick={() => router.push("/tryouts")}
-                size="lg"
-                variant="outline"
-                className="font-impact border-2 border-zinc-700 bg-transparent text-white text-lg md:text-xl px-10 py-8 w-full sm:w-auto rounded-xl"
-              >
-                TRYOUT INFO
+                TRYOUTS
               </Button>
             </motion.div>
           </motion.div>
@@ -215,11 +207,6 @@ export default function Home() {
             <h2 className="font-impact text-7xl md:text-9xl text-white uppercase tracking-tight leading-none">
               UPCOMING <span className="text-primary">TRYOUTS</span>
             </h2>
-            <p className="text-zinc-500 max-w-2xl mx-auto text-xl font-light">
-              Saskatchewan&apos;s most competitive evaluation process.
-              <br className="hidden md:block" /> Are you ready to earn your
-              spot?
-            </p>
           </motion.div>
 
           <div className="grid lg:grid-cols-1 gap-12 max-w-5xl mx-auto mb-20">
@@ -431,21 +418,13 @@ export default function Home() {
               &quot;Don&apos;t practice until you get it right. Practice until
               you can&apos;t get it wrong.&quot;
             </p>
-            <div className="flex flex-col sm:flex-row justify-center gap-6 pt-6">
+            <div className="pt-8 max-w-lg mx-auto">
               <Button
                 onClick={() => router.push("/tryouts")}
                 size="lg"
-                className="bg-primary text-white font-impact text-3xl px-16 py-10 rounded-2xl"
+                className="w-full bg-primary text-white font-impact text-4xl py-12 rounded-3xl shadow-2xl transition-all active:scale-[0.98]"
               >
-                GET STARTED
-              </Button>
-              <Button
-                onClick={() => router.push("/tryouts")}
-                size="lg"
-                variant="outline"
-                className="border-2 border-zinc-700 bg-transparent text-white font-impact text-3xl px-16 py-10 rounded-2xl"
-              >
-                VIEW SCHEDULE
+                TRYOUTS
               </Button>
             </div>
           </motion.div>
