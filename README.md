@@ -79,7 +79,6 @@ npm run dev
 - **/tryouts** - Public tryout schedule
 - **/dashboard** - Admin dashboard for coaches
 - **/parent-dashboard** - Portal for parents to view their registrations
-- **/profile** - User profile management
 - **/sign-in** - Authentication
 - **/sign-up** - Account creation
 

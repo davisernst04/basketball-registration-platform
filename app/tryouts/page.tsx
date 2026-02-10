@@ -1,4 +1,6 @@
 import Navbar from "@/components/Navbar";
+import { TryoutWithCount as DBTryout } from "@/types/database";
+import { Tryout } from "@/types";
 import { Badge } from "@/components/ui/badge";
 import { createPublicClient } from "@/utils/supabase/server";
 import { cacheLife } from "next/cache";
@@ -22,7 +24,7 @@ async function getTryouts() {
     return [];
   }
 
-  return tryouts.map((tryout: any) => ({
+  return tryouts.map((tryout: DBTryout) => ({
     ...tryout,
     startTime: tryout.start_time,
     endTime: tryout.end_time,
@@ -39,16 +41,16 @@ export default async function TryoutsPage() {
   const tryouts = await getTryouts();
 
   return (
-    <div className="min-h-screen bg-black text-white selection:bg-red-600/30 selection:text-white">
+    <div className="min-h-screen bg-black text-white selection:bg-primary/30 selection:text-white">
       <Navbar />
 
       {/* Tryouts Header */}
-      <div className="relative pt-40 pb-20 bg-zinc-950 overflow-hidden">
+      <div className="relative pt-40 pb-20 bg-black overflow-hidden">
         <div className="container mx-auto px-6 relative z-10">
           <div className="text-center space-y-6">
-            <Badge className="bg-red-600 hover:bg-red-600 text-white font-bold px-6 py-1.5 rounded-full tracking-widest text-xs">SEASON 2026</Badge>
+            <Badge className="bg-primary  text-white font-bold px-6 py-1.5 rounded-full tracking-widest text-xs">SEASON 2026</Badge>
             <h1 className="text-6xl md:text-8xl font-impact tracking-tighter uppercase leading-[0.9]">
-              JOIN THE <br/><span className="text-red-600">ELITE LEGACY</span>
+              JOIN THE <br/><span className="text-primary">ELITE LEGACY</span>
             </h1>
             <p className="text-zinc-400 max-w-2xl mx-auto text-lg md:text-xl font-light leading-relaxed">
               We are looking for dedicated players who are ready to push their limits. 
@@ -65,7 +67,7 @@ export default async function TryoutsPage() {
 
         <div className="max-w-6xl mx-auto">
           {tryouts.length === 0 ? (
-            <div className="bg-zinc-950 border border-zinc-800 border-dashed py-32 text-center rounded-[3rem]">
+            <div className="bg-black border border-border border-dashed py-32 text-center rounded-[3rem]">
               <div className="space-y-6">
                 <div className="mx-auto text-zinc-800 text-8xl">📅</div>
                 <div className="space-y-2">
@@ -75,19 +77,19 @@ export default async function TryoutsPage() {
               </div>
             </div>
           ) : (
-            <TryoutsList tryouts={tryouts as any} />
+            <TryoutsList tryouts={tryouts as Tryout[]} />
           )}
         </div>
       </div>
 
       {/* Info Section */}
-      <section className="bg-zinc-950 py-32 border-t border-zinc-900 relative overflow-hidden">
+      <section className="bg-black py-32 border-t border-zinc-900 relative overflow-hidden">
         <div className="container mx-auto px-6 relative z-10">
           <div className="max-w-5xl mx-auto">
             <div className="grid md:grid-cols-2 gap-16">
-              <div className="space-y-8 p-10 bg-black rounded-3xl border border-zinc-800">
+              <div className="space-y-8 p-10 bg-black rounded-3xl border border-border">
                 <div className="bg-zinc-900 w-16 h-16 flex items-center justify-center rounded-2xl">
-                  <span className="text-red-600 text-2xl">🏆</span>
+                  <span className="text-primary text-2xl">🏆</span>
                 </div>
                 <h3 className="text-3xl font-impact tracking-wider uppercase text-white">What to prepare?</h3>
                 <ul className="space-y-4">
@@ -98,23 +100,23 @@ export default async function TryoutsPage() {
                     "Arrive 20 minutes early for check-in"
                   ].map((item, i) => (
                     <li key={i} className="flex gap-4 items-center group">
-                      <div className="h-2 w-2 rounded-full bg-red-600 group-hover:scale-150 transition-transform"></div> 
-                      <span className="text-zinc-400 text-lg group-hover:text-white transition-colors">{item}</span>
+                      <div className="h-2 w-2 rounded-full bg-primary group-hover:scale-150 transition-transform"></div> 
+                      <span className="text-zinc-400 text-lg  transition-colors">{item}</span>
                     </li>
                   ))}
                 </ul>
               </div>
               
-              <div className="space-y-8 p-10 bg-zinc-900/30 rounded-3xl border border-zinc-800 flex flex-col justify-center">
+              <div className="space-y-8 p-10 bg-zinc-900/30 rounded-3xl border border-border flex flex-col justify-center">
                 <div className="bg-zinc-900 w-16 h-16 flex items-center justify-center rounded-2xl">
-                  <span className="text-red-600 text-2xl">🕒</span>
+                  <span className="text-primary text-2xl">🕒</span>
                 </div>
                 <h3 className="text-3xl font-impact tracking-wider uppercase text-white">The Results</h3>
                 <p className="text-zinc-500 text-xl leading-relaxed font-light italic">
                   &quot;Staff will evaluate performance metrics including footwork, shooting mechanics, defensive IQ, and coachability.&quot;
                 </p>
-                <div className="flex items-start gap-4 p-6 bg-black/50 rounded-2xl border border-zinc-800">
-                  <div className="text-red-600 shrink-0 mt-1">⚠️</div>
+                <div className="flex items-start gap-4 p-6 bg-black/50 rounded-2xl border border-border">
+                  <div className="text-primary shrink-0 mt-1">⚠️</div>
                   <p className="text-zinc-400 text-sm leading-relaxed">
                     Official placement notifications will be sent via the Parent Dashboard and email within 72 hours of the final session completion.
                   </p>

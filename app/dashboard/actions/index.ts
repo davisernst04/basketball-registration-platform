@@ -54,7 +54,7 @@ export async function createTryout(formData: TryoutFormData): Promise<ServerActi
     if (createError) throw createError;
 
     revalidatePath("/dashboard");
-    revalidatePath("/register");
+    revalidatePath("/tryouts");
     revalidatePath("/tryouts");
 
     const formattedTryout: Tryout = {
@@ -133,7 +133,7 @@ export async function updateTryout(formData: TryoutFormData): Promise<ServerActi
     if (updateError) throw updateError;
 
     revalidatePath("/dashboard");
-    revalidatePath("/register");
+    revalidatePath("/tryouts");
     revalidatePath("/tryouts");
 
     const formattedTryout: Tryout = {
@@ -179,7 +179,7 @@ export async function deleteTryout(id: string): Promise<ServerActionResponse> {
     if (deleteError) throw deleteError;
 
     revalidatePath("/dashboard");
-    revalidatePath("/register");
+    revalidatePath("/tryouts");
     revalidatePath("/tryouts");
 
     return { success: true, message: "Tryout deleted successfully" };

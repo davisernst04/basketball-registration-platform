@@ -1,13 +1,29 @@
-import { getProfile } from "../actions";
+import { createClient } from "@/utils/supabase/server";
 import UserProfile from "./UserProfile";
-import { redirect } from "next/navigation";
+import { Profile } from "@/types";
 
 export default async function UserProfileContainer() {
-  const result = await getProfile();
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
 
-  if (!result.success || !result.data) {
-    redirect("/sign-in");
+  if (!user) return null;
+
+  const { data: profile, error } = await supabase
+    .from("profiles")
+    .select("*")
+    .eq("id", user.id)
+    .single();
+
+  if (error || !profile) {
+    console.error("Supabase error fetching profile:", error);
+    return null;
   }
 
-  return <UserProfile initialProfile={result.data} />;
+  const formattedProfile: Profile = {
+    ...profile,
+    fullName: profile.full_name,
+    avatarUrl: profile.avatar_url,
+  };
+
+  return <UserProfile profile={formattedProfile} />;
 }

@@ -1,4 +1,4 @@
-import { Tryout, TryoutWithCount, RegistrationWithTryout } from "@/types/database";
+import { TryoutWithCount, RegistrationWithTryout } from "@/types/database";
 
 export function formatTryout(tryout: TryoutWithCount) {
   return {
@@ -13,7 +13,7 @@ export function formatTryout(tryout: TryoutWithCount) {
     createdAt: tryout.created_at,
     updatedAt: tryout.updated_at,
     _count: {
-      registrations: tryout.registrations[0]?.count || 0,
+      registrations: tryout.registration[0]?.count || 0,
     },
   };
 }

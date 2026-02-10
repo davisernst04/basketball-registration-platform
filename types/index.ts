@@ -11,7 +11,7 @@ export interface Profile {
 export interface Tryout {
   id: string;
   location: string;
-  date: Date;
+  date: string | Date;
   startTime: string;
   endTime: string;
   ageGroup: string;

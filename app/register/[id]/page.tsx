@@ -1,0 +1,72 @@
+import { createPublicClient } from "@/utils/supabase/server";
+import RegisterForm from "./_components/RegisterForm";
+import { Tryout as DBTryout } from "@/types/database";
+import { Tryout } from "@/types";
+import Navbar from "@/components/Navbar";
+import { Toaster } from "sonner";
+import { Suspense } from "react";
+import { Loader2 } from "lucide-react";
+import { createClient } from "@/utils/supabase/server";
+
+async function getTryout(id: string): Promise<Tryout | null> {
+  const supabase = createPublicClient();
+  const { data, error } = await supabase
+    .from("tryout")
+    .select("*")
+    .eq("id", id)
+    .single();
+
+  if (error || !data) return null;
+
+  const tryout = data as DBTryout;
+  return {
+    ...tryout,
+    startTime: tryout.start_time,
+    endTime: tryout.end_time,
+    ageGroup: tryout.age_group,
+    maxCapacity: tryout.max_capacity,
+    date: tryout.date,
+  } as Tryout;
+}
+
+async function RegisterContent({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const tryout = await getTryout(id);
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!tryout) {
+    return (
+      <div className="flex flex-col items-center justify-center p-4 min-h-[60vh]">
+        <h1 className="text-white text-2xl font-impact uppercase">Tryout session not found</h1>
+        <a href="/tryouts" className="text-primary mt-4 font-bold uppercase tracking-widest text-sm hover:underline">Back to schedule</a>
+      </div>
+    );
+  }
+
+  return <RegisterForm tryout={tryout} initialUser={user} />;
+}
+
+export default function RegisterPage({ params }: { params: Promise<{ id: string }> }) {
+  return (
+    <div className="min-h-screen bg-black">
+      <Suspense fallback={<div className="h-20 bg-black/80 w-full fixed top-0 z-50 border-b border-white/5" />}>
+        <Navbar />
+      </Suspense>
+      <Toaster position="top-center" richColors />
+
+      <div className="container mx-auto px-4 pt-36 pb-20 relative">
+        <div className="max-w-4xl mx-auto">
+          <Suspense fallback={
+            <div className="bg-card border border-border rounded-3xl p-20 flex flex-col items-center justify-center space-y-4">
+              <Loader2 className="animate-spin text-primary" size={48} />
+              <p className="text-zinc-500 font-impact uppercase tracking-widest">Loading Evaluation Portal...</p>
+            </div>
+          }>
+            <RegisterContent params={params} />
+          </Suspense>
+        </div>
+      </div>
+    </div>
+  );
+}

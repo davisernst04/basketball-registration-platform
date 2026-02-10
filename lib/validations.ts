@@ -16,9 +16,14 @@ export const registrationSchema = z.object({
 export const tryoutSchema = z.object({
   location: z.string().min(2, "Location is required"),
   date: z.coerce.date(),
-  startTime: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, "Invalid start time"),
-  endTime: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, "Invalid end time"),
+  // More lenient time regex to support HH:MM and HH:MM:SS
+  startTime: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9](:[0-5][0-9])?$/, "Invalid start time"),
+  endTime: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9](:[0-5][0-9])?$/, "Invalid end time"),
   ageGroup: z.string().min(1, "Age group is required"),
-  maxCapacity: z.coerce.number().int().positive().optional(),
+  // Handle empty string by transforming it to undefined, and allow positive integers
+  maxCapacity: z.preprocess(
+    (val) => (val === "" ? undefined : val),
+    z.coerce.number().int().positive().optional()
+  ),
   notes: z.string().optional(),
 });

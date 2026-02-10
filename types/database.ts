@@ -39,5 +39,5 @@ export interface RegistrationWithTryout extends Registration {
 }
 
 export interface TryoutWithCount extends Tryout {
-  registrations: { count: number }[];
+  registration: { count: number }[];
 }
