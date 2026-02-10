@@ -14,7 +14,7 @@ export async function createRegistration(formData: RegistrationFormData): Promis
       return { 
         success: false, 
         message: "Validation failed", 
-        error: validatedFields.error.errors.map(e => e.message).join(", ") 
+        error: validatedFields.error.issues.map(e => e.message).join(", ") 
       };
     }
 

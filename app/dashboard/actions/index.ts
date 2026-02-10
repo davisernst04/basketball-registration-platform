@@ -14,7 +14,7 @@ export async function createTryout(formData: TryoutFormData): Promise<ServerActi
       return { 
         success: false, 
         message: "Validation failed", 
-        error: validatedFields.error.errors.map(e => e.message).join(", ") 
+        error: validatedFields.error.issues.map(e => e.message).join(", ") 
       };
     }
 
@@ -94,7 +94,7 @@ export async function updateTryout(formData: TryoutFormData): Promise<ServerActi
       return { 
         success: false, 
         message: "Validation failed", 
-        error: validatedFields.error.errors.map(e => e.message).join(", ") 
+        error: validatedFields.error.issues.map(e => e.message).join(", ") 
       };
     }
 
