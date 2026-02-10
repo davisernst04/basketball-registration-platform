@@ -23,6 +23,8 @@ import {
  MapPin, 
  Clock,
  LayoutDashboard,
+ ChevronDown,
+ ChevronUp,
  ArrowLeft,
  Mail,
  Phone,
@@ -62,6 +64,7 @@ export default function DashboardPage() {
  const [selectedTryoutId, setSelectedTryoutId] = useState<string | null>(null);
  const [searchTerm, setSearchTerm] = useState("");
  const [editingTryout, setEditingTryout] = useState<ExtendedTryout | null>(null);
+ const [expandedPlayerId, setExpandedPlayerId] = useState<string | null>(null);
 
  const [newTryout, setNewTryout] = useState<TryoutFormData>({
   location: "",
@@ -457,65 +460,129 @@ export default function DashboardPage() {
           <p className="text-muted-foreground uppercase font-bold tracking-widest text-sm">No players registered for this session yet.</p>
          </div>
         ) : (
-         <div className="grid gap-4">
-          {filteredRegistrations.map((reg, index) => (
-           <motion.div 
-            key={reg.id} 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.05 }}
-           >
-            <Card className="bg-card border-border transition-all overflow-hidden shadow-sm">
-             <div className="flex flex-col lg:flex-row items-stretch">
-              <div className="p-6 lg:w-1/4 border-b lg:border-b-0 lg:border-r border-zinc-900 flex flex-col justify-center bg-black/50">
-               <span className="text-[10px] font-bold text-primary uppercase tracking-widest mb-1">Player</span>
-               <h3 className="text-xl font-impact uppercase text-white">{reg.playerName}</h3>
-               <div className="flex gap-2 mt-2">
-                <Badge variant="secondary" className="bg-zinc-900 text-zinc-400 border-border text-[10px] uppercase font-bold tracking-tighter">{reg.playerGrade}</Badge>
-                <Badge variant="secondary" className="bg-zinc-900 text-zinc-400 border-border text-[10px] uppercase font-bold tracking-tighter">{reg.playerAge} Yrs</Badge>
-               </div>
-              </div>
-              
-              <div className="p-6 lg:w-2/4 grid grid-cols-1 sm:grid-cols-2 gap-6">
-               <div className="space-y-2">
-                <span className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest flex items-center gap-2">
-                 <UserIcon size={10} /> Parent / Guardian
-                </span>
-                <p className="text-sm font-bold text-zinc-300">{reg.parentName}</p>
-                <div className="space-y-1">
-                 <a href={`mailto:${reg.parentEmail}`} className="text-xs text-muted-foreground flex items-center gap-2 ">
-                  <Mail size={12} /> {reg.parentEmail}
-                 </a>
-                 <a href={`tel:${reg.parentPhone}`} className="text-xs text-muted-foreground flex items-center gap-2 ">
-                  <Phone size={12} /> {reg.parentPhone}
-                 </a>
+         <div className="border border-border rounded-2xl overflow-hidden bg-card shadow-xl">
+          {/* Table Header */}
+          <div className="hidden lg:grid grid-cols-12 gap-4 px-8 py-4 bg-zinc-900/50 border-b border-border text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">
+           <div className="col-span-4">Player Name</div>
+           <div className="col-span-2">Grade</div>
+           <div className="col-span-2">Age</div>
+           <div className="col-span-3">Parent Name</div>
+           <div className="col-span-1 text-right"></div>
+          </div>
+
+          <div className="divide-y divide-zinc-900">
+           {filteredRegistrations.map((reg, index) => {
+            const isExpanded = expandedPlayerId === reg.id;
+            
+            return (
+             <motion.div 
+              key={reg.id} 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: index * 0.03 }}
+              className="group"
+             >
+              {/* Main Row */}
+              <div 
+               onClick={() => setExpandedPlayerId(isExpanded ? null : reg.id)}
+               className={`grid grid-cols-2 lg:grid-cols-12 gap-4 px-8 py-5 cursor-pointer transition-colors hover:bg-white/[0.02] items-center ${isExpanded ? 'bg-white/[0.03]' : ''}`}
+              >
+               <div className="col-span-1 lg:col-span-4 flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-zinc-900 flex items-center justify-center text-[10px] font-black text-primary border border-border group-hover:border-primary/50 transition-colors">
+                 {reg.playerName.substring(0, 2).toUpperCase()}
                 </div>
+                <span className="font-impact uppercase tracking-wider text-white text-lg">{reg.playerName}</span>
                </div>
-               <div className="space-y-2">
-                <span className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest flex items-center gap-2">
-                 <AlertCircle size={10} /> Emergency Contact
-                </span>
-                <p className="text-sm font-bold text-zinc-300">{reg.emergencyContact}</p>
-                <a href={`tel:${reg.emergencyPhone}`} className="text-xs text-muted-foreground flex items-center gap-2 ">
-                 <Phone size={12} /> {reg.emergencyPhone}
-                </a>
+               
+               <div className="hidden lg:block lg:col-span-2">
+                <Badge variant="secondary" className="bg-zinc-900 text-zinc-400 border-border text-[10px] uppercase font-bold">{reg.playerGrade}</Badge>
+               </div>
+               
+               <div className="hidden lg:block lg:col-span-2">
+                <span className="text-sm font-bold text-zinc-400 uppercase">{reg.playerAge} Yrs</span>
+               </div>
+               
+               <div className="hidden lg:block lg:col-span-3">
+                <span className="text-sm text-zinc-300 font-medium">{reg.parentName}</span>
+               </div>
+
+               <div className="col-span-1 lg:col-span-1 flex justify-end">
+                {isExpanded ? <ChevronUp size={18} className="text-primary" /> : <ChevronDown size={18} className="text-zinc-600" />}
+               </div>
+
+               {/* Mobile visible info */}
+               <div className="lg:hidden col-span-2 mt-2 flex gap-2">
+                <Badge variant="secondary" className="bg-zinc-900 text-zinc-400 border-border text-[10px] uppercase font-bold">{reg.playerGrade}</Badge>
+                <Badge variant="secondary" className="bg-zinc-900 text-zinc-400 border-border text-[10px] uppercase font-bold">{reg.playerAge} Yrs</Badge>
                </div>
               </div>
 
-              <div className="p-6 lg:w-1/4 bg-black/50 flex flex-col justify-center">
-               {reg.medicalInfo ? (
-                <div className="space-y-1">
-                 <span className="text-[10px] font-bold text-yellow-600/70 uppercase tracking-widest">Medical Info</span>
-                 <p className="text-xs text-muted-foreground line-clamp-3 italic">&quot;{reg.medicalInfo}&quot;</p>
-                </div>
-               ) : (
-                <span className="text-[10px] font-bold text-zinc-700 uppercase tracking-widest">No Medical Notes</span>
+              {/* Expanded Content */}
+              <AnimatePresence>
+               {isExpanded && (
+                <motion.div
+                 initial={{ height: 0, opacity: 0 }}
+                 animate={{ height: "auto", opacity: 1 }}
+                 exit={{ height: 0, opacity: 0 }}
+                 className="overflow-hidden bg-black/40"
+                >
+                 <div className="px-8 py-8 grid grid-cols-1 md:grid-cols-3 gap-8 border-t border-zinc-900">
+                  <div className="space-y-4">
+                   <div className="flex items-center gap-2 text-primary text-[10px] font-black uppercase tracking-widest">
+                    <UserIcon size={12} /> Contact Information
+                   </div>
+                   <div className="space-y-3">
+                    <div className="p-3 bg-zinc-900/50 rounded-xl border border-border">
+                     <p className="text-[10px] text-zinc-600 uppercase font-black mb-1">Parent Name</p>
+                     <p className="text-sm font-bold text-white uppercase">{reg.parentName}</p>
+                    </div>
+                    <div className="p-3 bg-zinc-900/50 rounded-xl border border-border">
+                     <p className="text-[10px] text-zinc-600 uppercase font-black mb-1">Email Address</p>
+                     <a href={`mailto:${reg.parentEmail}`} className="text-sm font-bold text-primary hover:underline">{reg.parentEmail}</a>
+                    </div>
+                    <div className="p-3 bg-zinc-900/50 rounded-xl border border-border">
+                     <p className="text-[10px] text-zinc-600 uppercase font-black mb-1">Phone Number</p>
+                     <a href={`tel:${reg.parentPhone}`} className="text-sm font-bold text-white">{reg.parentPhone}</a>
+                    </div>
+                   </div>
+                  </div>
+
+                  <div className="space-y-4">
+                   <div className="flex items-center gap-2 text-primary text-[10px] font-black uppercase tracking-widest">
+                    <AlertCircle size={12} /> Emergency Contact
+                   </div>
+                   <div className="space-y-3">
+                    <div className="p-3 bg-zinc-900/50 rounded-xl border border-border">
+                     <p className="text-[10px] text-zinc-600 uppercase font-black mb-1">Contact Name</p>
+                     <p className="text-sm font-bold text-white uppercase">{reg.emergencyContact}</p>
+                    </div>
+                    <div className="p-3 bg-zinc-900/50 rounded-xl border border-border">
+                     <p className="text-[10px] text-zinc-600 uppercase font-black mb-1">Emergency Phone</p>
+                     <a href={`tel:${reg.emergencyPhone}`} className="text-sm font-bold text-white">{reg.emergencyPhone}</a>
+                    </div>
+                   </div>
+                  </div>
+
+                  <div className="space-y-4">
+                   <div className="flex items-center gap-2 text-primary text-[10px] font-black uppercase tracking-widest">
+                    <LayoutDashboard size={12} /> Medical & Extra Info
+                   </div>
+                   <div className="p-5 bg-zinc-900/50 rounded-2xl border border-border min-h-[120px]">
+                    {reg.medicalInfo ? (
+                     <p className="text-sm text-zinc-400 italic leading-relaxed">&quot;{reg.medicalInfo}&quot;</p>
+                    ) : (
+                     <p className="text-sm text-zinc-600 uppercase font-black tracking-widest text-center mt-8">No medical info provided</p>
+                    )}
+                   </div>
+                  </div>
+                 </div>
+                </motion.div>
                )}
-              </div>
-             </div>
-            </Card>
-           </motion.div>
-          ))}
+              </AnimatePresence>
+             </motion.div>
+            );
+           })}
+          </div>
          </div>
         )}
        </motion.div>
