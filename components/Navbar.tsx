@@ -15,7 +15,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { UserAvatar } from "@/components/shadow/UserAvatar";
 import { User } from "@supabase/supabase-js";
 
 export default function Navbar() {
@@ -23,7 +23,7 @@ export default function Navbar() {
   const pathname = usePathname();
   const supabase = createClient();
   const [user, setUser] = useState<User | null>(null);
-  const [role, setRole] = useState<string | null>(null);
+  const [profile, setProfile] = useState<{ role: string; avatarUrl: string | null } | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -34,12 +34,18 @@ export default function Navbar() {
       setUser(user);
 
       if (user) {
-        const { data: profile } = await supabase
+        const { data: profileData } = await supabase
           .from("profiles")
-          .select("role")
+          .select("role, avatar_url")
           .eq("id", user.id)
           .single();
-        setRole(profile?.role || "parent");
+        
+        if (profileData) {
+          setProfile({
+            role: profileData.role || "parent",
+            avatarUrl: profileData.avatar_url
+          });
+        }
       }
       setLoading(false);
     };
@@ -54,7 +60,7 @@ export default function Navbar() {
         getUser();
       } else {
         setUser(null);
-        setRole(null);
+        setProfile(null);
       }
     });
 
@@ -111,15 +117,11 @@ export default function Navbar() {
                         whileTap={{ scale: 0.95 }}
                         className="cursor-pointer"
                       >
-                        <Avatar className="h-9 w-9 border border-white/10">
-                          <AvatarImage
-                            src={user.user_metadata?.avatar_url}
-                            alt={user.email || "User avatar"}
-                          />
-                          <AvatarFallback className="bg-zinc-900 text-primary text-[10px] font-bold">
-                            {user.email?.substring(0, 2).toUpperCase()}
-                          </AvatarFallback>
-                        </Avatar>
+                        <UserAvatar 
+                          src={profile?.avatarUrl} 
+                          fallback={user.email} 
+                          size="sm"
+                        />
                       </motion.div>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent
@@ -140,7 +142,7 @@ export default function Navbar() {
                         className="cursor-pointer  uppercase font-impact tracking-wider"
                         onClick={() =>
                           router.push(
-                            role === "admin"
+                            profile?.role === "admin"
                               ? "/dashboard"
                               : "/parent-dashboard",
                           )

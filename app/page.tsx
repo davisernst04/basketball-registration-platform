@@ -40,6 +40,15 @@ const staggerContainer = {
   },
 };
 
+const sponsors = [
+  "stub_spon1",
+  "stub_spon2",
+  "stub_spon3",
+  "stub_spon4",
+  "stub_spon5",
+  "stub_spon6",
+];
+
 export default function Home() {
   const router = useRouter();
   const [featuredTryouts, setFeaturedTryouts] = useState<any[]>([]);
@@ -67,22 +76,22 @@ export default function Home() {
       <Navbar />
 
       {/* Hero Section */}
-      <section className="relative min-h-screen pt-16 md:pt-20 flex items-center overflow-hidden">
-        {/* Background Slideshow - Floats to the right on desktop */}
-        <div className="absolute top-0 right-0 w-full md:w-1/2 h-[50vh] md:h-full z-0">
+      <section className="relative min-h-screen flex flex-col md:flex-row md:items-stretch overflow-hidden pt-16 md:pt-0">
+        {/* Background Slideshow */}
+        <div className="relative md:absolute top-0 md:top-20 bottom-0 right-0 w-full md:w-1/2 h-[70vh] md:h-auto z-0 order-1 md:order-2 flex-shrink-0">
           <HeroSlideshow />
           <div className="absolute inset-0 bg-linear-to-b from-transparent to-black md:bg-linear-to-r md:from-black md:via-black/20 md:to-transparent pointer-events-none"></div>
         </div>
 
-        <div className="max-w-7xl mx-auto px-6 md:px-16 w-full relative z-10">
-          <div className="md:w-1/2 pt-64 md:pt-0">
+        <div className="max-w-7xl mx-auto px-6 md:px-16 w-full relative z-10 flex items-center order-2 md:order-1">
+          <div className="md:w-1/2 py-12 md:pt-32">
             <motion.div
               initial="hidden"
               animate="visible"
               variants={staggerContainer}
-              className="space-y-6"
+              className="space-y-8"
             >
-              <motion.div variants={fadeInUp} className="space-y-2">
+              <motion.div variants={fadeInUp} className="space-y-4">
                 <span className="text-primary font-bold tracking-[0.3em] text-sm md:text-base uppercase inline-block border-l-2 border-primary pl-4">
                   EST. 2018
                 </span>
@@ -95,7 +104,7 @@ export default function Home() {
 
               <motion.p
                 variants={fadeInUp}
-                className="text-zinc-400 text-lg md:text-xl max-w-lg mb-8 leading-relaxed"
+                className="text-zinc-400 text-lg md:text-xl max-w-lg leading-relaxed"
               >
                 Saskatoon&apos;s premier youth basketball club, dedicated to
                 developing elite athletes through world-class training and
@@ -117,8 +126,35 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Mission Section - Redesigned for impact and alignment */}
-      <section className="py-40 bg-black relative overflow-hidden">
+      {/* Sponsors Banner - Tighter spacing */}
+      <section className="py-6 bg-zinc-900 border-y border-white/5 relative overflow-hidden">
+        <div className="max-w-7xl mx-auto px-6 md:px-16">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-8 md:gap-12">
+            <div className="shrink-0">
+              <span className="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-500 block mb-1">
+                Official
+              </span>
+              <span className="text-xs font-black uppercase tracking-[0.4em] text-primary">
+                Partners
+              </span>
+            </div>
+
+            <div className="flex flex-wrap justify-center items-center gap-x-12 gap-y-8 opacity-60 grayscale group hover:opacity-100 transition-opacity duration-700">
+              {sponsors.map((sponsor) => (
+                <span
+                  key={sponsor}
+                  className="font-impact text-xl md:text-2xl text-zinc-400 hover:text-white transition-colors cursor-default"
+                >
+                  {sponsor}
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Mission Section - Reduced spacing */}
+      <section className="py-16 md:py-20 bg-black relative overflow-hidden border-t border-white/5">
         {/* Large Decorative Text */}
         <div className="absolute top-1/2 left-0 -translate-y-1/2 -translate-x-1/4 select-none pointer-events-none opacity-[0.02] hidden lg:block">
           <h2 className="font-impact text-[30rem] text-white leading-none">
@@ -127,7 +163,7 @@ export default function Home() {
         </div>
 
         <div className="max-w-7xl mx-auto px-6 md:px-16 relative z-10">
-          <div className="grid lg:grid-cols-12 gap-16 items-start">
+          <div className="grid lg:grid-cols-12 gap-12 md:gap-20 items-center">
             {/* Image Composition */}
             <motion.div
               initial={{ opacity: 0, x: -50 }}
@@ -141,20 +177,13 @@ export default function Home() {
                   src="/action_shot_1.jpg"
                   alt="Shadow Basketball Action"
                   fill
-                  className="object-cover grayscale group-hover:grayscale-0 transition-all duration-1000 scale-105 group-hover:scale-100"
+                  className="object-cover object-top grayscale group-hover:grayscale-0 transition-all duration-1000 scale-105 group-hover:scale-100"
                 />
                 <div className="absolute inset-0 bg-linear-to-t from-black/80 via-transparent to-transparent"></div>
-                
-                {/* Floating Info Badge on Image */}
-                <div className="absolute bottom-8 left-8 right-8">
-                  <div className="bg-black/60 backdrop-blur-md border border-white/10 p-6 rounded-2xl">
-                    <p className="text-primary font-impact text-xl uppercase tracking-widest mb-1">Impact Player Development</p>
-                    <p className="text-zinc-400 text-sm font-medium uppercase tracking-tighter">Elite Coaching • National Competition • Leadership</p>
-                  </div>
-                </div>
+
+                <div className="absolute bottom-8 left-8 right-8"></div>
               </div>
 
-              {/* Decorative Accent */}
               <div className="absolute -top-6 -right-6 w-32 h-32 bg-primary/10 rounded-full blur-3xl"></div>
               <div className="absolute -bottom-6 -left-6 w-32 h-32 bg-primary/20 rounded-full blur-3xl"></div>
             </motion.div>
@@ -168,13 +197,7 @@ export default function Home() {
               className="lg:col-span-6 space-y-12"
             >
               <div className="space-y-6">
-                <div className="inline-flex items-center gap-2 px-3 py-1 bg-zinc-900 border border-white/10 rounded-full">
-                  <div className="w-2 h-2 bg-primary rounded-full animate-pulse"></div>
-                  <span className="text-zinc-400 text-[10px] font-black uppercase tracking-[0.2em]">
-                    Our Philosophy
-                  </span>
-                </div>
-                <h2 className="font-impact text-7xl md:text-9xl text-white uppercase leading-[0.85] tracking-tighter">
+                <h2 className="font-impact text-7xl md:text-8xl text-white uppercase leading-[0.85] tracking-tighter">
                   OUR <br />
                   <span className="text-primary">MISSION</span>
                 </h2>
@@ -183,61 +206,57 @@ export default function Home() {
                   <span className="text-white font-semibold underline decoration-primary underline-offset-8 decoration-2">
                     Shadow Basketball
                   </span>{" "}
-                  is the region&apos;s premier destination for youth elite development. 
-                  We forge the next generation of leaders through the crucible of competitive basketball.
+                  is the region&apos;s premier destination for youth elite
+                  development. We forge the next generation of leaders through
+                  the crucible of competitive basketball.
                 </p>
               </div>
 
-              <div className="grid gap-6">
-                <div className="group flex gap-6 p-8 bg-zinc-900/30 border border-white/5 rounded-3xl hover:bg-zinc-900/60 hover:border-primary/20 transition-all duration-500">
-                  <div className="bg-primary/10 w-16 h-16 shrink-0 flex items-center justify-center rounded-2xl group-hover:bg-primary group-hover:text-white transition-all duration-500 text-primary">
-                    <Zap size={32} />
-                  </div>
-                  <div className="space-y-2">
-                    <h4 className="text-white font-impact text-2xl uppercase tracking-wider">
-                      Elite Training
-                    </h4>
-                    <p className="text-zinc-500 text-base leading-relaxed">
-                      High-intensity specialized workouts designed for maximum skill growth and athletic performance.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="group flex gap-6 p-8 bg-zinc-900/30 border border-white/5 rounded-3xl hover:bg-zinc-900/60 hover:border-primary/20 transition-all duration-500">
-                  <div className="bg-primary/10 w-16 h-16 shrink-0 flex items-center justify-center rounded-2xl group-hover:bg-primary group-hover:text-white transition-all duration-500 text-primary">
-                    <Award size={32} />
-                  </div>
-                  <div className="space-y-2">
-                    <h4 className="text-white font-impact text-2xl uppercase tracking-wider">
-                      National Stage
-                    </h4>
-                    <p className="text-zinc-500 text-base leading-relaxed">
-                      We compete in the most prestigious tournaments nationwide, providing players maximum exposure.
-                    </p>
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.8, delay: 0.2 }}
+                className="relative aspect-video rounded-3xl overflow-hidden border border-white/5 shadow-2xl group/sub hidden lg:block"
+              >
+                <Image
+                  src="/action_shot_3.jpg"
+                  alt="Shadow Elite Training"
+                  fill
+                  className="object-cover object-top grayscale group-hover/sub:grayscale-0 transition-all duration-1000 scale-105 group-hover/sub:scale-100"
+                />
+                <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent"></div>
+                <div className="absolute bottom-6 left-6 right-6">
+                  <div className="flex items-center gap-3">
+                    <div className="h-px flex-1 bg-primary/50"></div>
+                    <span className="text-primary font-impact text-sm uppercase tracking-[0.3em]">
+                      Elite Performance
+                    </span>
+                    <div className="h-px flex-1 bg-primary/50"></div>
                   </div>
                 </div>
-              </div>
+              </motion.div>
             </motion.div>
           </div>
         </div>
       </section>
 
-      {/* Upcoming Tryouts Section */}
-      <section className="py-40 bg-zinc-950/50 border-y border-white/5 relative">
+      {/* Upcoming Tryouts Section - Reduced spacing */}
+      <section className="py-16 md:py-20 bg-zinc-950/50 border-y border-white/5 relative">
         <div className="max-w-7xl mx-auto px-6 md:px-16">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-center mb-24 space-y-6"
+            className="text-center mb-12 md:mb-16 space-y-6"
           >
-            <h2 className="font-impact text-7xl md:text-9xl text-white uppercase tracking-tighter leading-none">
+            <h2 className="font-impact text-7xl md:text-8xl text-white uppercase tracking-tighter leading-none">
               UPCOMING <span className="text-primary">TRYOUTS</span>
             </h2>
             <div className="w-24 h-1 bg-primary mx-auto"></div>
           </motion.div>
 
-          <div className="grid lg:grid-cols-1 gap-12 max-w-5xl mx-auto mb-20">
+          <div className="grid lg:grid-cols-1 gap-12 max-w-5xl mx-auto mb-12 md:mb-16">
             {loadingTryouts ? (
               [1, 2].map((i) => (
                 <div
@@ -259,9 +278,8 @@ export default function Home() {
                   whileInView={{ opacity: 1, scale: 1 }}
                   viewport={{ once: true }}
                   transition={{ delay: i * 0.1 }}
-                  className="bg-card border border-border p-10 md:p-16 rounded-[3rem] flex flex-col md:flex-row justify-between items-stretch transition-all duration-500 group shadow-2xl relative overflow-hidden"
+                  className="bg-card border border-border p-8 md:p-16 rounded-[3rem] flex flex-col md:flex-row justify-between items-stretch transition-all duration-500 group shadow-2xl relative overflow-hidden"
                 >
-                  {/* Decorative background number */}
                   <div className="absolute -bottom-10 -right-10 text-[15rem] font-impact text-white/[0.02] pointer-events-none">
                     0{i + 1}
                   </div>
@@ -276,12 +294,12 @@ export default function Home() {
                           Season 2026
                         </span>
                       </div>
-                      <h3 className="text-6xl md:text-8xl font-impact text-white uppercase tracking-wider leading-none">
+                      <h3 className="text-6xl md:text-7xl font-impact text-white uppercase tracking-wider leading-none">
                         {tryout.ageGroup}
                       </h3>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-10">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 md:gap-10">
                       <div className="space-y-3">
                         <div className="flex items-center gap-3 text-primary text-xs font-black uppercase tracking-widest">
                           <Calendar size={18} /> The Date
@@ -344,31 +362,32 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Process Section */}
-      <section className="py-40 bg-black overflow-hidden relative">
+      {/* Process Section - Reduced spacing */}
+      <section className="py-16 md:py-20 bg-black overflow-hidden relative">
         <div className="max-w-7xl mx-auto px-6 md:px-16">
           <div className="max-w-5xl">
             <motion.div
               initial={{ opacity: 0, x: -30 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
-              className="flex flex-col md:flex-row md:items-end justify-between mb-24 gap-6"
+              className="flex flex-col md:flex-row md:items-end justify-between mb-16 md:mb-20 gap-8"
             >
-              <h2 className="font-impact text-7xl md:text-9xl text-white uppercase tracking-tighter leading-none">
-                REGISTRATION <br /> <span className="text-primary">PROCESS</span>
+              <h2 className="font-impact text-5xl sm:text-7xl md:text-8xl text-white uppercase tracking-tighter leading-none">
+                TRYOUT <br /> <span className="text-primary">REGISTRATION</span>
               </h2>
               <p className="text-zinc-500 max-w-xs text-lg font-light border-l-2 border-primary pl-6 mb-2">
-                Simple steps to join the region&apos;s most competitive club.
+                Simple steps to register your player for a sShadow Basketball
+                tryout.
               </p>
             </motion.div>
 
-            <div className="grid gap-16 relative">
+            <div className="grid gap-12 md:gap-16 relative">
               <div className="absolute left-[2.4rem] md:left-[3.4rem] top-0 bottom-0 w-px bg-zinc-900 hidden sm:block"></div>
 
               {[
                 {
                   step: "01",
-                  title: "Create Account",
+                  title: "Create Account (Optional)",
                   desc: "Sign up as a parent to manage your players and registrations safely.",
                 },
                 {
@@ -384,7 +403,7 @@ export default function Home() {
                 {
                   step: "04",
                   title: "Compete",
-                  desc: "Bring your player to the gym and let them showcase their talent to our staff.",
+                  desc: "Bring your player to the gym and let them showcase their talent to our coaches.",
                 },
               ].map((item, i) => (
                 <motion.div
@@ -419,8 +438,8 @@ export default function Home() {
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="py-48 relative overflow-hidden group">
+      {/* CTA Section - Reduced from py-48 */}
+      <section className="py-16 md:py-20 relative overflow-hidden group">
         <div className="absolute inset-0 z-0">
           <Image
             src="/action_shot_5.jpg"
@@ -442,10 +461,6 @@ export default function Home() {
               JOIN THE
               <br /> <span className="text-primary">SHADOW TODAY</span>
             </h2>
-            <p className="text-2xl text-zinc-400 font-light max-w-2xl mx-auto italic">
-              &quot;Don&apos;t practice until you get it right. Practice until
-              you can&apos;t get it wrong.&quot;
-            </p>
             <div className="pt-8 max-w-lg mx-auto">
               <Button
                 onClick={() => router.push("/tryouts")}
@@ -459,9 +474,9 @@ export default function Home() {
         </div>
       </section>
 
-      <footer className="border-t border-white/5 bg-black pt-32 pb-16 relative overflow-hidden">
+      <footer className="border-t border-white/5 bg-black pt-16 md:pt-20 pb-12 relative overflow-hidden">
         <div className="max-w-7xl mx-auto px-6 md:px-16 relative z-10">
-          <div className="flex flex-col md:flex-row justify-between items-start gap-16 pb-24 border-b border-white/5">
+          <div className="flex flex-col md:flex-row justify-between items-start gap-16 pb-16 md:pb-20 border-b border-white/5">
             <div className="space-y-8 max-w-sm">
               <div className="flex items-center gap-3">
                 <Image
@@ -480,7 +495,10 @@ export default function Home() {
               </p>
               <div className="flex gap-4">
                 {["Instagram", "Twitter", "Facebook"].map((social) => (
-                  <button key={social} className="w-10 h-10 rounded-full bg-zinc-900 border border-white/5 flex items-center justify-center text-zinc-500 hover:text-primary hover:border-primary transition-all">
+                  <button
+                    key={social}
+                    className="w-10 h-10 rounded-full bg-zinc-900 border border-white/5 flex items-center justify-center text-zinc-500 hover:text-primary hover:border-primary transition-all"
+                  >
                     <span className="sr-only">{social}</span>
                     <div className="w-5 h-5 bg-current rounded-xs opacity-20"></div>
                   </button>
@@ -488,7 +506,7 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-16">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-12 md:gap-16">
               <div className="space-y-6">
                 <h5 className="text-white font-impact text-xl uppercase tracking-widest">
                   Platform
@@ -534,13 +552,17 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="pt-16 flex flex-col md:flex-row justify-between items-center gap-8">
+          <div className="pt-12 md:pt-16 flex flex-col md:flex-row justify-between items-center gap-8">
             <p className="text-zinc-700 text-[10px] font-bold uppercase tracking-[0.5em]">
               &copy; 2026 Shadow Basketball Club. Saskatoon, SK.
             </p>
             <div className="flex gap-8">
-              <button className="text-zinc-700 text-[10px] font-bold uppercase tracking-[0.3em] hover:text-zinc-500 transition-colors">Privacy Policy</button>
-              <button className="text-zinc-700 text-[10px] font-bold uppercase tracking-[0.3em] hover:text-zinc-500 transition-colors">Terms of Service</button>
+              <button className="text-zinc-700 text-[10px] font-bold uppercase tracking-[0.3em] hover:text-zinc-500 transition-colors">
+                Privacy Policy
+              </button>
+              <button className="text-zinc-700 text-[10px] font-bold uppercase tracking-[0.3em] hover:text-zinc-500 transition-colors">
+                Terms of Service
+              </button>
             </div>
           </div>
         </div>
@@ -548,3 +570,4 @@ export default function Home() {
     </main>
   );
 }
+
