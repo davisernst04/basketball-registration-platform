@@ -88,7 +88,7 @@ export default function RegisterForm({
         });
 
         if (initialUser) {
-          setTimeout(() => router.push("/parent-dashboard"), 2000);
+          setTimeout(() => router.push("/dashboard"), 2000);
         } else {
           router.push("/");
         }

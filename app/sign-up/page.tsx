@@ -2,160 +2,218 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { createClient } from "@/utils/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import Link from "next/link";
-import Image from "next/image";
-import { AlertCircle, CheckCircle2, Loader2 } from "lucide-react";
+import {
+  AlertCircle,
+  CheckCircle2,
+  Loader2,
+  User,
+  Mail,
+  Lock,
+} from "lucide-react";
 import { motion } from "framer-motion";
+import Navbar from "@/components/Navbar";
+import { signUpAction } from "./actions";
 
 export default function SignUpPage() {
- const router = useRouter();
- const [error, setError] = useState<string | null>(null);
- const [success, setSuccess] = useState(false);
- const [loading, setLoading] = useState(false);
- const supabase = createClient();
+  const router = useRouter();
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
+  const [loading, setLoading] = useState(false);
 
- async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-  e.preventDefault();
-  setError(null);
-  setLoading(true);
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setError(null);
+    setLoading(true);
 
-  const formData = new FormData(e.currentTarget);
-  const name = formData.get("name") as string;
-  const email = formData.get("email") as string;
-  const password = formData.get("password") as string;
+    const formData = new FormData(e.currentTarget);
+    const email = formData.get("email") as string;
 
-  const { error } = await supabase.auth.signUp({
-   email,
-   password,
-   options: {
-    data: {
-     full_name: name,
-    },
-   },
-  });
+    const result = await signUpAction(formData);
 
-  if (error) {
-   setError(error.message || "Something went wrong.");
-   setLoading(false);
-  } else {
-   setSuccess(true);
-   setLoading(false);
-   setTimeout(() => router.push("/parent-dashboard"), 3000);
+    if (!result.success) {
+      setError(result.message || "Something went wrong.");
+      setLoading(false);
+    } else {
+      localStorage.setItem("signupEmail", email);
+      setSuccess(true);
+      setLoading(false);
+      setTimeout(() => router.push("/verify-email"), 2000);
+    }
   }
- }
 
- return (
-  <main className="min-h-screen bg-black flex flex-col items-center justify-center p-6">
-   <motion.div 
-    initial={{ opacity: 0, y: -20 }}
-    animate={{ opacity: 1, y: 0 }}
-    className="flex items-center gap-2 mb-8 cursor-pointer" 
-    onClick={() => router.push("/")}
-   >
-    <Image src="/logo.jpg" alt="Logo" width={40} height={40} className="rounded-md" />
-    <span className="font-impact text-2xl text-white tracking-widest uppercase">SHADOW BASKETBALL</span>
-   </motion.div>
+  return (
+    <div className="min-h-screen bg-black selection:bg-primary/30 selection:text-white">
+      <Navbar />
 
-   <motion.div
-    initial={{ opacity: 0, scale: 0.95 }}
-    animate={{ opacity: 1, scale: 1 }}
-    transition={{ delay: 0.1 }}
-    className="w-full max-w-md"
-   >
-    <Card className="bg-card border-border rounded-2xl overflow-hidden">
-     <CardHeader className="space-y-1 p-8 border-b border-zinc-900">
-      <CardTitle className="text-3xl font-impact tracking-wider text-white text-center uppercase">Create Account</CardTitle>
-      <CardDescription className="text-zinc-500 text-center uppercase text-[10px] font-bold tracking-[0.2em] mt-2">
-       Join the Shadow legacy today
-      </CardDescription>
-     </CardHeader>
-     {success ? (
-      <CardContent className="space-y-6 p-12 text-center">
-       <motion.div 
-        initial={{ scale: 0.5, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        className="bg-green-950/30 border border-green-900 p-8 rounded-3xl flex flex-col items-center gap-4 text-green-500 shadow-[0_0_30px_rgba(34,197,94,0.1)]"
-       >
-        <CheckCircle2 size={64} strokeWidth={1.5} />
-        <div className="space-y-2">
-         <h3 className="text-2xl font-impact tracking-wide uppercase">Elite Access Granted</h3>
-         <p className="text-sm text-green-600/80 font-medium">Your account has been created. We are preparing your personal dashboard...</p>
-        </div>
-       </motion.div>
-       <Button 
-        className="w-full bg-zinc-800 text-white font-bold h-12 rounded-xl" 
-        onClick={() => router.push("/parent-dashboard")}
-       >
-        GO TO DASHBOARD
-       </Button>
-      </CardContent>
-     ) : (
-      <form onSubmit={handleSubmit}>
-       <CardContent className="space-y-6 p-8">
-        {error && (
-         <div className="bg-red-950/30 border border-red-900 p-4 rounded-xl flex items-center gap-3 text-primary text-xs font-bold uppercase tracking-wide">
-          <AlertCircle size={18} />
-          {error}
-         </div>
-        )}
-        <div className="space-y-2">
-         <Label htmlFor="name" className="text-zinc-500 uppercase text-[10px] font-bold tracking-widest ml-1">Full Name</Label>
-         <Input
-          id="name"
-          name="name"
-          placeholder="Coach John"
-          required
-          className="bg-black border-border text-white focus:border-primary h-12 rounded-xl"
-         />
-        </div>
-        <div className="space-y-2">
-         <Label htmlFor="email" className="text-zinc-500 uppercase text-[10px] font-bold tracking-widest ml-1">Email Address</Label>
-         <Input
-          id="email"
-          name="email"
-          type="email"
-          placeholder="m@example.com"
-          required
-          className="bg-black border-border text-white focus:border-primary h-12 rounded-xl"
-         />
-        </div>
-        <div className="space-y-2">
-         <Label htmlFor="password" className="text-zinc-500 uppercase text-[10px] font-bold tracking-widest ml-1">Secure Password</Label>
-         <Input
-          id="password"
-          name="password"
-          type="password"
-          required
-          minLength={8}
-          className="bg-black border-border text-white focus:border-primary h-12 rounded-xl"
-         />
-         <p className="text-[10px] text-zinc-700 uppercase font-black tracking-tighter px-1">Min. 8 characters required</p>
-        </div>
-       </CardContent>
-       <CardFooter className="flex flex-col space-y-6 p-8 bg-black border-t border-zinc-900">
-        <Button
-         type="submit"
-         disabled={loading}
-         className="w-full bg-primary text-white font-impact text-xl h-14 rounded-xl transition-all active:scale-[0.98]"
+      <main className="min-h-screen flex flex-col items-center justify-center pt-32 pb-20 relative overflow-hidden">
+        {/* Background Decorations */}
+        <div className="absolute bottom-1/4 -left-20 w-96 h-96 bg-primary/10 rounded-full blur-[100px] pointer-events-none" />
+        <div className="absolute top-1/4 -right-20 w-96 h-96 bg-zinc-800/10 rounded-full blur-[100px] pointer-events-none" />
+
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95, y: 20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          transition={{ duration: 0.4, ease: "easeOut" }}
+          className="w-full max-w-md relative z-10"
         >
-         {loading ? <Loader2 className="animate-spin" /> : "JOIN THE CLUB"}
-        </Button>
-        <div className="text-xs text-center text-zinc-500 uppercase font-bold tracking-widest">
-         Member already?{" "}
-         <Link href="/sign-in" className="text-primary ">
-          Sign in
-         </Link>
-        </div>
-       </CardFooter>
-      </form>
-     )}
-    </Card>
-   </motion.div>
-  </main>
- );
+          <Card className="bg-zinc-950/80 backdrop-blur-xl border-zinc-800 shadow-2xl overflow-hidden rounded-[2rem]">
+            <CardHeader className="space-y-2 p-10 pb-2 border-b border-zinc-900/50">
+              <CardTitle className="text-4xl font-impact tracking-wider text-white text-center uppercase leading-none">
+                Join the <span className="text-primary">Shadow</span>
+              </CardTitle>
+              <CardDescription className="text-zinc-500 text-center font-medium tracking-wide">
+                Start your journey to elite performance
+              </CardDescription>
+            </CardHeader>
+            {success ? (
+              <CardContent className="text-center p-10">
+                <motion.div
+                  initial={{ scale: 0.5, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  className="bg-green-500/10 border border-green-500/20 p-8 rounded-[2rem] flex flex-col items-center gap-6 text-green-500 mb-8"
+                >
+                  <div className="bg-green-500/20 p-4 rounded-full">
+                    <CheckCircle2 size={48} strokeWidth={2} />
+                  </div>
+                  <div className="space-y-2">
+                    <h3 className="text-2xl font-impact tracking-wide uppercase text-white">
+                      Check Your Inbox
+                    </h3>
+                    <p className="text-sm text-green-400/80 font-medium leading-relaxed">
+                      We've sent a verification link to your email. Please verify your account to continue.
+                    </p>
+                  </div>
+                </motion.div>
+                <Button
+                  className="w-full bg-white text-black hover:bg-zinc-200 font-impact text-xl h-14 rounded-xl transition-all"
+                  onClick={() => router.push("/verify-email")}
+                >
+                  VERIFY EMAIL
+                </Button>
+              </CardContent>
+            ) : (
+              <form onSubmit={handleSubmit}>
+                <CardContent className="space-y-6 p-10 pt-8">
+                  {error && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="bg-red-500/10 border border-red-500/20 p-4 rounded-xl flex items-start gap-3 text-red-400 text-sm font-medium"
+                    >
+                      <AlertCircle size={18} className="shrink-0 mt-0.5" />
+                      {error}
+                    </motion.div>
+                  )}
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label
+                        htmlFor="name"
+                        className="text-zinc-400 text-xs font-bold uppercase tracking-widest ml-1"
+                      >
+                        Full Name
+                      </Label>
+                      <div className="relative">
+                        <User
+                          className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-600"
+                          size={18}
+                        />
+                        <Input
+                          id="name"
+                          name="name"
+                          placeholder="John Doe"
+                          required
+                          className="pl-11 bg-zinc-900/50 border-zinc-800 text-white focus:border-primary focus:ring-primary/20 h-14 rounded-xl transition-all hover:border-zinc-700"
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label
+                        htmlFor="email"
+                        className="text-zinc-400 text-xs font-bold uppercase tracking-widest ml-1"
+                      >
+                        Email Address
+                      </Label>
+                      <div className="relative">
+                        <Mail
+                          className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-600"
+                          size={18}
+                        />
+                        <Input
+                          id="email"
+                          name="email"
+                          type="email"
+                          placeholder="m@example.com"
+                          required
+                          className="pl-11 bg-zinc-900/50 border-zinc-800 text-white focus:border-primary focus:ring-primary/20 h-14 rounded-xl transition-all hover:border-zinc-700"
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label
+                        htmlFor="password"
+                        className="text-zinc-400 text-xs font-bold uppercase tracking-widest ml-1"
+                      >
+                        Secure Password
+                      </Label>
+                      <div className="relative">
+                        <Lock
+                          className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-600"
+                          size={18}
+                        />
+                        <Input
+                          id="password"
+                          name="password"
+                          type="password"
+                          required
+                          minLength={8}
+                          className="pl-11 bg-zinc-900/50 border-zinc-800 text-white focus:border-primary focus:ring-primary/20 h-14 rounded-xl transition-all hover:border-zinc-700"
+                        />
+                      </div>
+                      <p className="text-[10px] text-zinc-600 font-medium px-1">
+                        Must be at least 8 characters long
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+                <CardFooter className="flex flex-col space-y-6 p-10 pt-2 bg-zinc-950/50">
+                  <Button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full bg-primary hover:bg-primary/90 text-white font-impact text-2xl h-16 rounded-xl transition-all active:scale-[0.98] shadow-lg shadow-primary/20"
+                  >
+                    {loading ? (
+                      <Loader2 className="animate-spin" />
+                    ) : (
+                      "JOIN THE CLUB"
+                    )}
+                  </Button>
+                  <div className="text-sm text-center text-zinc-500 font-medium">
+                    Already a member?{" "}
+                    <Link
+                      href="/sign-in"
+                      className="text-white hover:text-primary transition-colors font-bold ml-1"
+                    >
+                      Sign In
+                    </Link>
+                  </div>
+                </CardFooter>
+              </form>
+            )}
+          </Card>
+        </motion.div>
+      </main>
+    </div>
+  );
 }

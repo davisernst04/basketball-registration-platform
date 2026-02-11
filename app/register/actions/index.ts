@@ -78,7 +78,7 @@ export async function createRegistration(formData: RegistrationFormData): Promis
 
     if (regError) throw regError;
 
-    revalidatePath("/parent-dashboard");
+    revalidatePath("/dashboard");
     revalidatePath("/dashboard");
 
     const formattedRegistration: Registration = {

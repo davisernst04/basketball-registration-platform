@@ -206,9 +206,9 @@ export default function Home() {
                   <span className="text-white font-semibold underline decoration-primary underline-offset-8 decoration-2">
                     Shadow Basketball
                   </span>{" "}
-                  is Saskatoon&apos;s premier destination for youth elite
-                  development. We forge the next generation of leaders through
-                  the crucible of competitive basketball.
+                  is Saskatoon&apos;s premier destination for youth basketball.
+                  Our club focuses on core principles that allow athletes to
+                  excel both on and off the court.
                 </p>
               </div>
 
@@ -218,12 +218,12 @@ export default function Home() {
                   {
                     icon: <Zap className="text-primary" size={24} />,
                     title: "Elite Performance",
-                    desc: "Specialized athletic training designed for maximum skill growth.",
+                    desc: "Basketball training designed for players to reach their maximum potential.",
                   },
                   {
                     icon: <Trophy className="text-primary" size={24} />,
-                    title: "National Stage",
-                    desc: "Competing in the most prestigious tournaments nationwide.",
+                    title: "Provincial Competition",
+                    desc: "Competing against the best basketball teams in the province.",
                   },
                 ].map((pillar, i) => (
                   <motion.div
@@ -263,7 +263,6 @@ export default function Home() {
             <h2 className="font-impact text-7xl md:text-8xl text-white uppercase tracking-tighter leading-none">
               UPCOMING <span className="text-primary">TRYOUTS</span>
             </h2>
-            <div className="w-24 h-1 bg-primary mx-auto"></div>
           </motion.div>
 
           <div className="grid lg:grid-cols-1 gap-12 max-w-5xl mx-auto mb-12 md:mb-16">

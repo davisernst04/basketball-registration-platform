@@ -147,7 +147,7 @@ export default function Navbar() {
                           router.push(
                             profile?.role === "admin"
                               ? "/dashboard"
-                              : "/parent-dashboard",
+                              : "/dashboard",
                           )
                         }
                       >

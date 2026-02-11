@@ -38,40 +38,15 @@ export const updateSession = async (request: NextRequest) => {
 
   // Handle protected routes
   const isDashboard = request.nextUrl.pathname.startsWith('/dashboard');
-  const isParentDashboard = request.nextUrl.pathname.startsWith('/parent-dashboard');
 
-  if (!user && (isDashboard || isParentDashboard)) {
+  if (!user && isDashboard) {
     const url = request.nextUrl.clone();
     url.pathname = '/sign-in';
     return NextResponse.redirect(url);
   }
 
-  // Cross-role protection
-  if (user) {
-    // We need to check the role from the public.profiles table
-    // For middleware, we'll do a quick fetch
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('role')
-      .eq('id', user.id)
-      .single();
-
-    const role = profile?.role || 'parent';
-
-    // If a parent tries to access the admin dashboard, redirect them
-    if (role === 'parent' && isDashboard) {
-      const url = request.nextUrl.clone();
-      url.pathname = '/parent-dashboard';
-      return NextResponse.redirect(url);
-    }
-
-    // If an admin tries to access the parent dashboard, redirect them (optional, but consistent)
-    if (role === 'admin' && isParentDashboard) {
-      const url = request.nextUrl.clone();
-      url.pathname = '/dashboard';
-      return NextResponse.redirect(url);
-    }
-  }
+  // Cross-role protection removed as both roles share /dashboard now.
+  // The page component handles rendering the correct UI.
 
   return supabaseResponse;
 };
