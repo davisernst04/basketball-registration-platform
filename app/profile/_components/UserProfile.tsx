@@ -125,7 +125,7 @@ export default function UserProfile({ profile }: UserProfileProps) {
             <div className="relative group">
               <UserAvatar
                 src={formData.avatarUrl}
-                fallback={profile.email}
+                fallback={profile.email || ""}
                 size="xl"
                 className="h-24 w-24 border-4 border-black shadow-xl"
               />

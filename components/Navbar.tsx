@@ -23,7 +23,10 @@ export default function Navbar() {
   const pathname = usePathname();
   const supabase = createClient();
   const [user, setUser] = useState<User | null>(null);
-  const [profile, setProfile] = useState<{ role: string; avatarUrl: string | null } | null>(null);
+  const [profile, setProfile] = useState<{
+    role: string;
+    avatarUrl: string | null;
+  } | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -39,11 +42,11 @@ export default function Navbar() {
           .select("role, avatar_url")
           .eq("id", user.id)
           .single();
-        
+
         if (profileData) {
           setProfile({
             role: profileData.role || "parent",
-            avatarUrl: profileData.avatar_url
+            avatarUrl: profileData.avatar_url,
           });
         }
       }
@@ -89,8 +92,8 @@ export default function Navbar() {
             <Image
               src="/logo.jpg"
               alt="Shadow Basketball Logo"
-              width={45}
-              height={45}
+              width={60}
+              height={60}
               className="object-contain md:w-[50px]"
             />
           </motion.div>
@@ -117,9 +120,9 @@ export default function Navbar() {
                         whileTap={{ scale: 0.95 }}
                         className="cursor-pointer"
                       >
-                        <UserAvatar 
-                          src={profile?.avatarUrl} 
-                          fallback={user.email} 
+                        <UserAvatar
+                          src={profile?.avatarUrl}
+                          fallback={user.email}
                           size="sm"
                         />
                       </motion.div>
@@ -192,3 +195,4 @@ export default function Navbar() {
     </motion.header>
   );
 }
+

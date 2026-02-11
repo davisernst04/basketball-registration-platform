@@ -6,7 +6,7 @@ export const registrationSchema = z.object({
   parentPhone: z.string().min(10, "Phone number must be at least 10 characters"),
   playerName: z.string().min(2, "Player name must be at least 2 characters"),
   playerAge: z.coerce.number().min(5).max(18),
-  playerGrade: z.string().min(1, "Grade is required"),
+  playerGrade: z.string().optional(),
   medicalInfo: z.string().optional(),
   emergencyContact: z.string().min(2, "Emergency contact name is required"),
   emergencyPhone: z.string().min(10, "Emergency phone must be at least 10 characters"),
@@ -16,9 +16,9 @@ export const registrationSchema = z.object({
 export const tryoutSchema = z.object({
   location: z.string().min(2, "Location is required"),
   date: z.coerce.date(),
-  // More lenient time regex to support HH:MM and HH:MM:SS
-  startTime: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9](:[0-5][0-9])?$/, "Invalid start time"),
-  endTime: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9](:[0-5][0-9])?$/, "Invalid end time"),
+  startTime: z.string().optional(),
+  endTime: z.string().optional(),
+  registrationDeadline: z.coerce.date(),
   ageGroup: z.string().min(1, "Age group is required"),
   // Handle empty string by transforming it to undefined, and allow positive integers
   maxCapacity: z.preprocess(

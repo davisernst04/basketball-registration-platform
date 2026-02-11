@@ -35,15 +35,16 @@ export async function createTryout(formData: TryoutFormData): Promise<ServerActi
       return { success: false, message: "Forbidden: Admin access required" };
     }
 
-    const { location, date, startTime, endTime, ageGroup, maxCapacity, notes } = validatedFields.data;
+    const { location, date, startTime, endTime, registrationDeadline, ageGroup, maxCapacity, notes } = validatedFields.data;
 
     const { data: tryout, error: createError } = await supabase
       .from("tryout")
       .insert({
         location,
         date: date.toISOString(),
-        start_time: startTime,
-        end_time: endTime,
+        start_time: startTime || null,
+        end_time: endTime || null,
+        registration_deadline: registrationDeadline.toISOString(),
         age_group: ageGroup,
         max_capacity: maxCapacity || null,
         notes,
@@ -61,6 +62,7 @@ export async function createTryout(formData: TryoutFormData): Promise<ServerActi
       ...tryout,
       startTime: tryout.start_time,
       endTime: tryout.end_time,
+      registrationDeadline: tryout.registration_deadline,
       ageGroup: tryout.age_group,
       maxCapacity: tryout.max_capacity,
     };
@@ -112,15 +114,16 @@ export async function updateTryout(formData: TryoutFormData): Promise<ServerActi
       return { success: false, message: "Forbidden" };
     }
 
-    const { location, date, startTime, endTime, ageGroup, maxCapacity, notes } = validatedFields.data;
+    const { location, date, startTime, endTime, registrationDeadline, ageGroup, maxCapacity, notes } = validatedFields.data;
 
     const { data: tryout, error: updateError } = await supabase
       .from("tryout")
       .update({
         location,
         date: date.toISOString(),
-        start_time: startTime,
-        end_time: endTime,
+        start_time: startTime || null,
+        end_time: endTime || null,
+        registration_deadline: registrationDeadline.toISOString(),
         age_group: ageGroup,
         max_capacity: maxCapacity || null,
         notes,
@@ -140,6 +143,7 @@ export async function updateTryout(formData: TryoutFormData): Promise<ServerActi
       ...tryout,
       startTime: tryout.start_time,
       endTime: tryout.end_time,
+      registrationDeadline: tryout.registration_deadline,
       ageGroup: tryout.age_group,
       maxCapacity: tryout.max_capacity,
     };

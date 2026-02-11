@@ -29,8 +29,7 @@ import {
  Mail,
  Phone,
  User as UserIcon,
- AlertCircle,
- RefreshCw
+ AlertCircle
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Toaster, toast } from "sonner";
@@ -43,8 +42,9 @@ interface ExtendedRegistration extends Registration {
   ageGroup: string;
   date: string | Date;
   location: string;
-  startTime: string;
-  endTime: string;
+  startTime: string | null;
+  endTime: string | null;
+  registrationDeadline: string | Date;
  };
 }
 
@@ -55,6 +55,8 @@ interface ExtendedTryout extends Tryout {
 }
 
 type TabType = "schedule" | "create";
+
+const AGE_GROUPS = ["U11", "U13", "U15", "U18"];
 
 export default function DashboardPage() {
  const [registrations, setRegistrations] = useState<ExtendedRegistration[]>([]);
@@ -69,8 +71,7 @@ export default function DashboardPage() {
  const [newTryout, setNewTryout] = useState<TryoutFormData>({
   location: "",
   date: "",
-  startTime: "",
-  endTime: "",
+  registrationDeadline: "",
   ageGroup: "",
   maxCapacity: "",
   notes: "",
@@ -110,6 +111,7 @@ export default function DashboardPage() {
    const result = await createTryout({
     ...newTryout,
     date: new Date(newTryout.date).toISOString(),
+    registrationDeadline: new Date(newTryout.registrationDeadline).toISOString(),
    });
 
    if (result.success) {
@@ -117,8 +119,7 @@ export default function DashboardPage() {
     setNewTryout({
      location: "",
      date: "",
-     startTime: "",
-     endTime: "",
+     registrationDeadline: "",
      ageGroup: "",
      maxCapacity: "",
      notes: "",
@@ -145,6 +146,7 @@ export default function DashboardPage() {
     id: editingTryout.id,
     ...newTryout,
     date: new Date(newTryout.date).toISOString(),
+    registrationDeadline: new Date(newTryout.registrationDeadline).toISOString(),
    });
 
    if (result.success) {
@@ -153,8 +155,7 @@ export default function DashboardPage() {
     setNewTryout({
      location: "",
      date: "",
-     startTime: "",
-     endTime: "",
+     registrationDeadline: "",
      ageGroup: "",
      maxCapacity: "",
      notes: "",
@@ -202,8 +203,7 @@ export default function DashboardPage() {
   setNewTryout({
    location: tryout.location,
    date: new Date(tryout.date).toISOString().split("T")[0],
-   startTime: tryout.startTime,
-   endTime: tryout.endTime,
+   registrationDeadline: new Date(tryout.registrationDeadline).toISOString().slice(0, 16), // Format for datetime-local
    ageGroup: tryout.ageGroup,
    maxCapacity: tryout.maxCapacity?.toString() || "",
    notes: tryout.notes || "",
@@ -216,8 +216,7 @@ export default function DashboardPage() {
   setNewTryout({
    location: "",
    date: "",
-   startTime: "",
-   endTime: "",
+   registrationDeadline: "",
    ageGroup: "",
    maxCapacity: "",
    notes: "",
@@ -298,16 +297,7 @@ export default function DashboardPage() {
         </button>
        ))}
       </div>
-
-      <Button 
-       variant="ghost" 
-       size="sm" 
-       onClick={() => loadData()}
-       className="text-muted-foreground mb-2 gap-2"
-      >
-       <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
-       <span className="text-[10px] font-bold uppercase">Refresh Data</span>
-      </Button>
+      {/* Refresh Button Removed */}
      </div>
 
      {/* Tab Content */}
@@ -373,7 +363,12 @@ export default function DashboardPage() {
                </div>
                <div className="flex items-center gap-3 text-zinc-400">
                 <Clock size={16} className="text-primary" />
-                <span className="text-sm font-bold text-white uppercase">{tryout.startTime} - {tryout.endTime}</span>
+                <div className="flex flex-col">
+                  <span className="text-[10px] text-zinc-500 uppercase font-black">Register By</span>
+                  <span className="text-sm font-bold text-white uppercase">
+                    {new Date(tryout.registrationDeadline).toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                  </span>
+                </div>
                </div>
                <div className="flex items-center gap-3 text-zinc-400">
                 <MapPin size={16} className="text-primary" />
@@ -610,17 +605,21 @@ export default function DashboardPage() {
            <div className="grid md:grid-cols-2 gap-8">
             <div className="space-y-3">
              <Label htmlFor="ageGroup" className="text-muted-foreground uppercase text-[10px] font-bold tracking-[0.2em] ml-1">Age Group *</Label>
-             <Input
+             <select
               id="ageGroup"
               required
-              placeholder="e.g. U12 BOYS"
               value={newTryout.ageGroup}
               onChange={(e) => setNewTryout({ ...newTryout, ageGroup: e.target.value })}
-              className="bg-black border-border text-white focus:border-primary h-12 rounded-xl"
-             />
+              className="flex h-12 w-full items-center justify-between rounded-xl border border-border bg-black px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary disabled:cursor-not-allowed disabled:opacity-50"
+             >
+              <option value="" disabled>Select Age Group</option>
+              {AGE_GROUPS.map((group) => (
+               <option key={group} value={group}>{group}</option>
+              ))}
+             </select>
             </div>
             <div className="space-y-3">
-             <Label htmlFor="date" className="text-muted-foreground uppercase text-[10px] font-bold tracking-[0.2em] ml-1">Date *</Label>
+             <Label htmlFor="date" className="text-muted-foreground uppercase text-[10px] font-bold tracking-[0.2em] ml-1">Tryout Date *</Label>
              <Input
               id="date"
               type="date"
@@ -630,28 +629,20 @@ export default function DashboardPage() {
               className="bg-black border-border text-white focus:border-primary h-12 rounded-xl"
              />
             </div>
-            <div className="space-y-3">
-             <Label htmlFor="startTime" className="text-muted-foreground uppercase text-[10px] font-bold tracking-[0.2em] ml-1">Start Time *</Label>
+            
+            <div className="space-y-3 md:col-span-2">
+             <Label htmlFor="registrationDeadline" className="text-muted-foreground uppercase text-[10px] font-bold tracking-[0.2em] ml-1">Registration Deadline *</Label>
              <Input
-              id="startTime"
-              type="time"
+              id="registrationDeadline"
+              type="datetime-local"
               required
-              value={newTryout.startTime}
-              onChange={(e) => setNewTryout({ ...newTryout, startTime: e.target.value })}
+              value={newTryout.registrationDeadline as string}
+              onChange={(e) => setNewTryout({ ...newTryout, registrationDeadline: e.target.value })}
               className="bg-black border-border text-white focus:border-primary h-12 rounded-xl"
              />
+             <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-wide mt-1">Details will be sent via email after this deadline.</p>
             </div>
-            <div className="space-y-3">
-             <Label htmlFor="endTime" className="text-muted-foreground uppercase text-[10px] font-bold tracking-[0.2em] ml-1">End Time *</Label>
-             <Input
-              id="endTime"
-              type="time"
-              required
-              value={newTryout.endTime}
-              onChange={(e) => setNewTryout({ ...newTryout, endTime: e.target.value })}
-              className="bg-black border-border text-white focus:border-primary h-12 rounded-xl"
-             />
-            </div>
+
             <div className="space-y-3">
              <Label htmlFor="location" className="text-muted-foreground uppercase text-[10px] font-bold tracking-[0.2em] ml-1">Location *</Label>
              <Input

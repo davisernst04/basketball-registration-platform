@@ -28,6 +28,7 @@ async function getTryouts() {
     ...tryout,
     startTime: tryout.start_time,
     endTime: tryout.end_time,
+    registrationDeadline: tryout.registration_deadline,
     ageGroup: tryout.age_group,
     maxCapacity: tryout.max_capacity,
     date: tryout.date, // already a string from Supabase
@@ -61,7 +62,7 @@ export default async function TryoutsPage() {
       </div>
 
       {/* Tryouts Grid */}
-      <div className="mx-auto px-6 md:px-16 py-24 relative">
+      <div className="mx-auto px-6 md:px-16 py-12 relative">
         <div className="absolute top-0 left-1/4 w-px h-full bg-zinc-900/50 -z-10 hidden lg:block"></div>
         <div className="absolute top-0 right-1/4 w-px h-full bg-zinc-900/50 -z-10 hidden lg:block"></div>
 

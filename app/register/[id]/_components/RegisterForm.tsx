@@ -14,7 +14,14 @@ import {
 } from "@/components/ui/card";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
-import { CheckCircle2, Loader2, ClipboardCheck, User, ShieldCheck, Zap } from "lucide-react";
+import {
+  CheckCircle2,
+  Loader2,
+  ClipboardCheck,
+  User,
+  ShieldCheck,
+  Zap,
+} from "lucide-react";
 import { createRegistration } from "../../actions";
 import { Tryout, RegistrationFormData } from "@/types";
 
@@ -30,11 +37,11 @@ interface RegisterFormProps {
 
 const fadeInUp = {
   hidden: { opacity: 0, y: 20 },
-  visible: { 
-    opacity: 1, 
+  visible: {
+    opacity: 1,
     y: 0,
-    transition: { duration: 0.5, ease: "easeOut" as const }
-  }
+    transition: { duration: 0.5, ease: "easeOut" as const },
+  },
 };
 
 const staggerContainer = {
@@ -42,12 +49,15 @@ const staggerContainer = {
   visible: {
     opacity: 1,
     transition: {
-      staggerChildren: 0.1
-    }
-  }
+      staggerChildren: 0.1,
+    },
+  },
 };
 
-export default function RegisterForm({ tryout, initialUser }: RegisterFormProps) {
+export default function RegisterForm({
+  tryout,
+  initialUser,
+}: RegisterFormProps) {
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
 
@@ -74,9 +84,9 @@ export default function RegisterForm({ tryout, initialUser }: RegisterFormProps)
       if (result.success) {
         toast.success(result.message, {
           description: "We've received your application. Redirecting...",
-          icon: <CheckCircle2 className="text-primary" />
+          icon: <CheckCircle2 className="text-primary" />,
         });
-        
+
         if (initialUser) {
           setTimeout(() => router.push("/parent-dashboard"), 2000);
         } else {
@@ -84,7 +94,8 @@ export default function RegisterForm({ tryout, initialUser }: RegisterFormProps)
         }
       } else {
         toast.error("Registration failed", {
-          description: result.message || "Please check your information and try again.",
+          description:
+            result.message || "Please check your information and try again.",
         });
       }
     } catch (err) {
@@ -96,29 +107,26 @@ export default function RegisterForm({ tryout, initialUser }: RegisterFormProps)
   };
 
   return (
-    <Card className="bg-card border-border rounded-3xl overflow-hidden">
-      <CardHeader className="text-center p-12 border-b border-border">
+    <Card className="bg-card border-border rounded-3xl overflow-hidden py-0">
+      <CardHeader className="border-b border-border  md:px-16">
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
           className="flex justify-center mb-6"
-        >
-          <div className="bg-zinc-900 p-4 rounded-2xl">
-            <ClipboardCheck className="text-primary" size={40} />
-          </div>
-        </motion.div>
+        ></motion.div>
         <CardTitle className="text-5xl md:text-6xl font-impact tracking-wider text-white uppercase leading-none">
           {tryout.ageGroup} <span className="text-primary">REGISTRATION</span>
         </CardTitle>
         <CardDescription className="text-zinc-500 mt-4 text-xl font-light">
-          Registering for session at {tryout.location} on {new Date(tryout.date).toLocaleDateString()}
+          Registering for tryout session at {tryout.location} on{" "}
+          {new Date(tryout.date).toLocaleDateString()}
         </CardDescription>
       </CardHeader>
-      
-      <CardContent className="p-10 md:p-16">
+
+      <CardContent className="md:px-16">
         <form onSubmit={handleSubmit}>
-          <motion.div 
+          <motion.div
             variants={staggerContainer}
             initial="hidden"
             animate="visible"
@@ -136,37 +144,58 @@ export default function RegisterForm({ tryout, initialUser }: RegisterFormProps)
 
               <div className="grid md:grid-cols-2 gap-8">
                 <div className="space-y-3">
-                  <Label htmlFor="parentName" className="text-zinc-500 font-bold uppercase text-[10px] tracking-[0.2em] ml-1">Full Name</Label>
+                  <Label
+                    htmlFor="parentName"
+                    className="text-zinc-500 font-bold uppercase text-[10px] tracking-[0.2em] ml-1"
+                  >
+                    Full Name
+                  </Label>
                   <Input
                     id="parentName"
                     required
                     value={formData.parentName}
-                    onChange={(e) => setFormData({ ...formData, parentName: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, parentName: e.target.value })
+                    }
                     className="bg-zinc-900/50 border-border text-white focus:border-primary h-14 rounded-2xl transition-all"
                   />
                 </div>
 
                 <div className="space-y-3">
-                  <Label htmlFor="parentEmail" className="text-zinc-500 font-bold uppercase text-[10px] tracking-[0.2em] ml-1">Email Address</Label>
+                  <Label
+                    htmlFor="parentEmail"
+                    className="text-zinc-500 font-bold uppercase text-[10px] tracking-[0.2em] ml-1"
+                  >
+                    Email Address
+                  </Label>
                   <Input
                     id="parentEmail"
                     type="email"
                     required
                     value={formData.parentEmail}
-                    onChange={(e) => setFormData({ ...formData, parentEmail: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, parentEmail: e.target.value })
+                    }
                     className="bg-zinc-900/50 border-border text-white focus:border-primary h-14 rounded-2xl transition-all"
                   />
                 </div>
 
                 <div className="space-y-3 md:col-span-2">
-                  <Label htmlFor="parentPhone" className="text-zinc-500 font-bold uppercase text-[10px] tracking-[0.2em] ml-1">Phone Number</Label>
+                  <Label
+                    htmlFor="parentPhone"
+                    className="text-zinc-500 font-bold uppercase text-[10px] tracking-[0.2em] ml-1"
+                  >
+                    Phone Number
+                  </Label>
                   <Input
                     id="parentPhone"
                     type="tel"
                     required
                     placeholder="(555) 000-0000"
                     value={formData.parentPhone}
-                    onChange={(e) => setFormData({ ...formData, parentPhone: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, parentPhone: e.target.value })
+                    }
                     className="bg-zinc-900/50 border-border text-white focus:border-primary h-14 rounded-2xl transition-all"
                   />
                 </div>
@@ -183,20 +212,32 @@ export default function RegisterForm({ tryout, initialUser }: RegisterFormProps)
                 </h3>
               </div>
 
-              <div className="grid md:grid-cols-2 gap-8">
+              <div className="grid md:grid-cols-3 gap-8">
                 <div className="space-y-3 md:col-span-2">
-                  <Label htmlFor="playerName" className="text-zinc-500 font-bold uppercase text-[10px] tracking-[0.2em] ml-1">Player Full Name</Label>
+                  <Label
+                    htmlFor="playerName"
+                    className="text-zinc-500 font-bold uppercase text-[10px] tracking-[0.2em] ml-1"
+                  >
+                    Player Full Name
+                  </Label>
                   <Input
                     id="playerName"
                     required
                     value={formData.playerName}
-                    onChange={(e) => setFormData({ ...formData, playerName: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, playerName: e.target.value })
+                    }
                     className="bg-zinc-900/50 border-border text-white focus:border-primary h-14 rounded-2xl transition-all"
                   />
                 </div>
 
                 <div className="space-y-3">
-                  <Label htmlFor="playerAge" className="text-zinc-500 font-bold uppercase text-[10px] tracking-[0.2em] ml-1">Age</Label>
+                  <Label
+                    htmlFor="playerAge"
+                    className="text-zinc-500 font-bold uppercase text-[10px] tracking-[0.2em] ml-1"
+                  >
+                    Age
+                  </Label>
                   <Input
                     id="playerAge"
                     type="number"
@@ -204,30 +245,27 @@ export default function RegisterForm({ tryout, initialUser }: RegisterFormProps)
                     min="5"
                     max="18"
                     value={formData.playerAge}
-                    onChange={(e) => setFormData({ ...formData, playerAge: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, playerAge: e.target.value })
+                    }
                     className="bg-zinc-900/50 border-border text-white focus:border-primary h-14 rounded-2xl transition-all"
                   />
                 </div>
 
-                <div className="space-y-3">
-                  <Label htmlFor="playerGrade" className="text-zinc-500 font-bold uppercase text-[10px] tracking-[0.2em] ml-1">Current Grade</Label>
-                  <Input
-                    id="playerGrade"
-                    required
-                    placeholder="e.g. 8th Grade"
-                    value={formData.playerGrade}
-                    onChange={(e) => setFormData({ ...formData, playerGrade: e.target.value })}
-                    className="bg-zinc-900/50 border-border text-white focus:border-primary h-14 rounded-2xl transition-all"
-                  />
-                </div>
-
-                <div className="space-y-3 md:col-span-2">
-                  <Label htmlFor="medicalInfo" className="text-zinc-500 font-bold uppercase text-[10px] tracking-[0.2em] ml-1">Medical Info / Allergies</Label>
+                <div className="space-y-3 md:col-span-3">
+                  <Label
+                    htmlFor="medicalInfo"
+                    className="text-zinc-500 font-bold uppercase text-[10px] tracking-[0.2em] ml-1"
+                  >
+                    Medical Info / Allergies
+                  </Label>
                   <Input
                     id="medicalInfo"
                     placeholder="Optional: Any conditions our staff should know"
                     value={formData.medicalInfo}
-                    onChange={(e) => setFormData({ ...formData, medicalInfo: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, medicalInfo: e.target.value })
+                    }
                     className="bg-zinc-900/50 border-border text-white focus:border-primary h-14 rounded-2xl transition-all"
                   />
                 </div>
@@ -246,35 +284,58 @@ export default function RegisterForm({ tryout, initialUser }: RegisterFormProps)
 
               <div className="grid md:grid-cols-2 gap-8">
                 <div className="space-y-3">
-                  <Label htmlFor="emergencyContact" className="text-zinc-500 font-bold uppercase text-[10px] tracking-[0.2em] ml-1">Contact Name</Label>
+                  <Label
+                    htmlFor="emergencyContact"
+                    className="text-zinc-500 font-bold uppercase text-[10px] tracking-[0.2em] ml-1"
+                  >
+                    Contact Name
+                  </Label>
                   <Input
                     id="emergencyContact"
                     required
                     value={formData.emergencyContact}
-                    onChange={(e) => setFormData({ ...formData, emergencyContact: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        emergencyContact: e.target.value,
+                      })
+                    }
                     className="bg-zinc-900/50 border-border text-white focus:border-primary h-14 rounded-2xl transition-all"
                   />
                 </div>
 
                 <div className="space-y-3">
-                  <Label htmlFor="emergencyPhone" className="text-zinc-500 font-bold uppercase text-[10px] tracking-[0.2em] ml-1">Contact Phone</Label>
+                  <Label
+                    htmlFor="emergencyPhone"
+                    className="text-zinc-500 font-bold uppercase text-[10px] tracking-[0.2em] ml-1"
+                  >
+                    Contact Phone
+                  </Label>
                   <Input
                     id="emergencyPhone"
                     type="tel"
                     required
                     value={formData.emergencyPhone}
-                    onChange={(e) => setFormData({ ...formData, emergencyPhone: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        emergencyPhone: e.target.value,
+                      })
+                    }
                     className="bg-zinc-900/50 border-border text-white focus:border-primary h-14 rounded-2xl transition-all"
                   />
                 </div>
               </div>
             </motion.div>
 
-            <motion.div variants={fadeInUp} className="pt-10 border-t border-border">
+            <motion.div
+              variants={fadeInUp}
+              className="pt-10 border-t border-border"
+            >
               <Button
                 type="submit"
                 disabled={submitting}
-                className="w-full bg-primary  text-white font-impact text-3xl h-24 rounded-2xl group transition-all duration-200"
+                className="w-full bg-primary  text-white font-impact text-xl md:text-3xl h-auto py-6 rounded-2xl group transition-all duration-200 whitespace-normal"
               >
                 {submitting ? (
                   <div className="flex items-center gap-4 uppercase tracking-tighter">
@@ -286,8 +347,9 @@ export default function RegisterForm({ tryout, initialUser }: RegisterFormProps)
                   </div>
                 )}
               </Button>
-              <p className="text-center text-zinc-700 text-[10px] font-black uppercase tracking-[0.4em] mt-8 leading-loose">
-                Official Shadow Basketball registration portal • &copy; 2026 Season
+              <p className="text-center text-zinc-700 text-[10px] font-black uppercase tracking-[0.4em] my-8 leading-loose">
+                Official Shadow Basketball registration portal • &copy; 2026
+                Season
               </p>
             </motion.div>
           </motion.div>

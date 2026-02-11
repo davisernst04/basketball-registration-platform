@@ -23,23 +23,37 @@ async function getTryout(id: string): Promise<Tryout | null> {
     ...tryout,
     startTime: tryout.start_time,
     endTime: tryout.end_time,
+    registrationDeadline: tryout.registration_deadline,
     ageGroup: tryout.age_group,
     maxCapacity: tryout.max_capacity,
     date: tryout.date,
   } as Tryout;
 }
 
-async function RegisterContent({ params }: { params: Promise<{ id: string }> }) {
+async function RegisterContent({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
   const { id } = await params;
   const tryout = await getTryout(id);
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   if (!tryout) {
     return (
       <div className="flex flex-col items-center justify-center p-4 min-h-[60vh]">
-        <h1 className="text-white text-2xl font-impact uppercase">Tryout session not found</h1>
-        <a href="/tryouts" className="text-primary mt-4 font-bold uppercase tracking-widest text-sm hover:underline">Back to schedule</a>
+        <h1 className="text-white text-2xl font-impact uppercase">
+          Tryout session not found
+        </h1>
+        <a
+          href="/tryouts"
+          className="text-primary mt-4 font-bold uppercase tracking-widest text-sm hover:underline"
+        >
+          Back to schedule
+        </a>
       </div>
     );
   }
@@ -47,22 +61,34 @@ async function RegisterContent({ params }: { params: Promise<{ id: string }> }) 
   return <RegisterForm tryout={tryout} initialUser={user} />;
 }
 
-export default function RegisterPage({ params }: { params: Promise<{ id: string }> }) {
+export default function RegisterPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
   return (
     <div className="min-h-screen bg-black">
-      <Suspense fallback={<div className="h-20 bg-black/80 w-full fixed top-0 z-50 border-b border-white/5" />}>
+      <Suspense
+        fallback={
+          <div className="h-20 bg-black/80 w-full fixed top-0 z-50 border-b border-white/5" />
+        }
+      >
         <Navbar />
       </Suspense>
       <Toaster position="top-center" richColors />
 
-      <div className="container mx-auto px-4 pt-36 pb-20 relative">
-        <div className="max-w-4xl mx-auto">
-          <Suspense fallback={
-            <div className="bg-card border border-border rounded-3xl p-20 flex flex-col items-center justify-center space-y-4">
-              <Loader2 className="animate-spin text-primary" size={48} />
-              <p className="text-zinc-500 font-impact uppercase tracking-widest">Loading Evaluation Portal...</p>
-            </div>
-          }>
+      <div className="mx-auto px-4 py-28 relative">
+        <div className="max-w-6xl mx-auto">
+          <Suspense
+            fallback={
+              <div className="bg-card border border-border rounded-3xl p-20 flex flex-col items-center justify-center space-y-4">
+                <Loader2 className="animate-spin text-primary" size={48} />
+                <p className="text-zinc-500 font-impact uppercase tracking-widest">
+                  Loading Evaluation Portal...
+                </p>
+              </div>
+            }
+          >
             <RegisterContent params={params} />
           </Suspense>
         </div>

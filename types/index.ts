@@ -12,8 +12,9 @@ export interface Tryout {
   id: string;
   location: string;
   date: string | Date;
-  startTime: string;
-  endTime: string;
+  startTime?: string | null;
+  endTime?: string | null;
+  registrationDeadline: string | Date;
   ageGroup: string;
   maxCapacity: number | null;
   notes: string | null;
@@ -26,7 +27,7 @@ export interface Registration {
   parentPhone: string;
   playerName: string;
   playerAge: number;
-  playerGrade: string;
+  playerGrade?: string | null;
   medicalInfo: string | null;
   emergencyContact: string;
   emergencyPhone: string;
@@ -47,7 +48,7 @@ export interface RegistrationFormData {
   parentPhone: string;
   playerName: string;
   playerAge: string | number;
-  playerGrade: string;
+  playerGrade?: string;
   medicalInfo?: string;
   emergencyContact: string;
   emergencyPhone: string;
@@ -58,8 +59,9 @@ export interface TryoutFormData {
   id?: string;
   location: string;
   date: string | Date;
-  startTime: string;
-  endTime: string;
+  startTime?: string | null;
+  endTime?: string | null;
+  registrationDeadline: string | Date;
   ageGroup: string;
   maxCapacity?: string | number;
   notes?: string;

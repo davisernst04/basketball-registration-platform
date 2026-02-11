@@ -2,8 +2,9 @@ export interface Tryout {
   id: string;
   location: string;
   date: string;
-  start_time: string;
-  end_time: string;
+  start_time: string | null;
+  end_time: string | null;
+  registration_deadline: string;
   age_group: string;
   max_capacity: number | null;
   notes: string | null;
@@ -18,7 +19,7 @@ export interface Registration {
   parent_phone: string;
   player_name: string;
   player_age: number;
-  player_grade: string;
+  player_grade: string | null;
   medical_info: string | null;
   emergency_contact: string;
   emergency_phone: string;
@@ -33,8 +34,9 @@ export interface RegistrationWithTryout extends Registration {
     age_group: string;
     date: string;
     location: string;
-    start_time: string;
-    end_time: string;
+    start_time: string | null;
+    end_time: string | null;
+    registration_deadline: string;
   } | null;
 }
 
