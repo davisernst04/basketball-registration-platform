@@ -111,7 +111,7 @@ export default function Home() {
                 competition.
               </motion.p>
 
-              <motion.div variants={fadeInUp} className="pt-4 max-w-md">
+              <motion.div variants={fadeInUp} className=" max-w-md">
                 <Button
                   onClick={() => router.push("/tryouts")}
                   size="lg"
@@ -206,9 +206,12 @@ export default function Home() {
                   <span className="text-white font-semibold underline decoration-primary underline-offset-8 decoration-2">
                     Shadow Basketball
                   </span>{" "}
-                  is the region&apos;s premier destination for youth elite
-                  development. We forge the next generation of leaders through
-                  the crucible of competitive basketball.
+                  is Saskatoon&apos;s premier destination for youth basketball
+                  development. We lead the way in cultivating elite talent
+                  through high perfrormance training, competitive play, and a
+                  culture of excellence. Our mission is to empower young
+                  athletes to reach their full potential on and off the court,
+                  creating a love for the game.
                 </p>
               </div>
 
@@ -570,4 +573,3 @@ export default function Home() {
     </main>
   );
 }
-
