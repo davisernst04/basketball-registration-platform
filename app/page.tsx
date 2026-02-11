@@ -87,7 +87,7 @@ export default function Home() {
         </div>
 
         <div className="max-w-7xl mx-auto px-6 md:px-16 w-full relative z-10 flex items-center order-2 md:order-1">
-          <div className="md:w-1/2 py-12 md:pt-40">
+          <div className="md:w-1/2 py-12 md:pt-32">
             <motion.div
               initial="hidden"
               animate="visible"

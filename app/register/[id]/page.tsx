@@ -77,7 +77,7 @@ export default function RegisterPage({
       </Suspense>
       <Toaster position="top-center" richColors />
 
-      <div className="mx-auto px-4 py-28 relative">
+      <div className="mx-auto px-4 pt-32 pb-4 relative">
         <div className="max-w-6xl mx-auto">
           <Suspense
             fallback={
