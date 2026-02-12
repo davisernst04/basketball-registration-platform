@@ -83,7 +83,7 @@ export default function Navbar() {
       transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
       className="border-b border-white/5 bg-black/80 backdrop-blur-md fixed top-0 left-0 right-0 z-50 h-16 md:h-20"
     >
-      <div className="h-full max-w-7xl mx-auto px-6 md:px-16 flex justify-between items-center">
+      <div className="h-full max-w-8xl mx-auto px-6 md:px-16 flex justify-between items-center">
         <Link
           href="/"
           className="flex items-center gap-3 group transition-opacity active:opacity-80"
@@ -195,4 +195,3 @@ export default function Navbar() {
     </motion.header>
   );
 }
-

@@ -16,7 +16,6 @@ import {
 import Link from "next/link";
 import {
   AlertCircle,
-  CheckCircle2,
   Loader2,
   User,
   Mail,
@@ -47,9 +46,7 @@ export default function SignUpPage() {
       setLoading(false);
     } else {
       localStorage.setItem("signupEmail", email);
-      setSuccess(true);
-      setLoading(false);
-      setTimeout(() => router.push("/verify-email"), 2000);
+      router.push("/verify-email");
     }
   }
 
@@ -77,140 +74,112 @@ export default function SignUpPage() {
                 Start your journey to elite performance
               </CardDescription>
             </CardHeader>
-            {success ? (
-              <CardContent className="text-center p-10">
-                <motion.div
-                  initial={{ scale: 0.5, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  className="bg-green-500/10 border border-green-500/20 p-8 rounded-[2rem] flex flex-col items-center gap-6 text-green-500 mb-8"
-                >
-                  <div className="bg-green-500/20 p-4 rounded-full">
-                    <CheckCircle2 size={48} strokeWidth={2} />
+            <form onSubmit={handleSubmit}>
+              <CardContent className="space-y-6 p-10 pt-8">
+                {error && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="bg-red-500/10 border border-red-500/20 p-4 rounded-xl flex items-start gap-3 text-red-400 text-sm font-medium"
+                  >
+                    <AlertCircle size={18} className="shrink-0 mt-0.5" />
+                    {error}
+                  </motion.div>
+                )}
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label
+                      htmlFor="name"
+                      className="text-zinc-400 text-xs font-bold uppercase tracking-widest ml-1"
+                    >
+                      Full Name
+                    </Label>
+                    <div className="relative">
+                      <User
+                        className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-600"
+                        size={18}
+                      />
+                      <Input
+                        id="name"
+                        name="name"
+                        placeholder="John Doe"
+                        required
+                        className="pl-11 bg-zinc-900/50 border-zinc-800 text-white focus:border-primary focus:ring-primary/20 h-14 rounded-xl transition-all hover:border-zinc-700"
+                      />
+                    </div>
                   </div>
                   <div className="space-y-2">
-                    <h3 className="text-2xl font-impact tracking-wide uppercase text-white">
-                      Check Your Inbox
-                    </h3>
-                    <p className="text-sm text-green-400/80 font-medium leading-relaxed">
-                      We've sent a verification link to your email. Please verify your account to continue.
+                    <Label
+                      htmlFor="email"
+                      className="text-zinc-400 text-xs font-bold uppercase tracking-widest ml-1"
+                    >
+                      Email Address
+                    </Label>
+                    <div className="relative">
+                      <Mail
+                        className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-600"
+                        size={18}
+                      />
+                      <Input
+                        id="email"
+                        name="email"
+                        type="email"
+                        placeholder="m@example.com"
+                        required
+                        className="pl-11 bg-zinc-900/50 border-zinc-800 text-white focus:border-primary focus:ring-primary/20 h-14 rounded-xl transition-all hover:border-zinc-700"
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label
+                      htmlFor="password"
+                      className="text-zinc-400 text-xs font-bold uppercase tracking-widest ml-1"
+                    >
+                      Secure Password
+                    </Label>
+                    <div className="relative">
+                      <Lock
+                        className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-600"
+                        size={18}
+                      />
+                      <Input
+                        id="password"
+                        name="password"
+                        type="password"
+                        required
+                        minLength={8}
+                        className="pl-11 bg-zinc-900/50 border-zinc-800 text-white focus:border-primary focus:ring-primary/20 h-14 rounded-xl transition-all hover:border-zinc-700"
+                      />
+                    </div>
+                    <p className="text-[10px] text-zinc-600 font-medium px-1">
+                      Must be at least 8 characters long
                     </p>
                   </div>
-                </motion.div>
-                <Button
-                  className="w-full bg-white text-black hover:bg-zinc-200 font-impact text-xl h-14 rounded-xl transition-all"
-                  onClick={() => router.push("/verify-email")}
-                >
-                  VERIFY EMAIL
-                </Button>
+                </div>
               </CardContent>
-            ) : (
-              <form onSubmit={handleSubmit}>
-                <CardContent className="space-y-6 p-10 pt-8">
-                  {error && (
-                    <motion.div
-                      initial={{ opacity: 0, y: -10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="bg-red-500/10 border border-red-500/20 p-4 rounded-xl flex items-start gap-3 text-red-400 text-sm font-medium"
-                    >
-                      <AlertCircle size={18} className="shrink-0 mt-0.5" />
-                      {error}
-                    </motion.div>
+              <CardFooter className="flex flex-col space-y-6 p-10 pt-2 bg-zinc-950/50">
+                <Button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full bg-primary hover:bg-primary/90 text-white font-impact text-2xl h-16 rounded-xl transition-all active:scale-[0.98] shadow-lg shadow-primary/20"
+                >
+                  {loading ? (
+                    <Loader2 className="animate-spin" />
+                  ) : (
+                    "JOIN THE CLUB"
                   )}
-                  <div className="space-y-4">
-                    <div className="space-y-2">
-                      <Label
-                        htmlFor="name"
-                        className="text-zinc-400 text-xs font-bold uppercase tracking-widest ml-1"
-                      >
-                        Full Name
-                      </Label>
-                      <div className="relative">
-                        <User
-                          className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-600"
-                          size={18}
-                        />
-                        <Input
-                          id="name"
-                          name="name"
-                          placeholder="John Doe"
-                          required
-                          className="pl-11 bg-zinc-900/50 border-zinc-800 text-white focus:border-primary focus:ring-primary/20 h-14 rounded-xl transition-all hover:border-zinc-700"
-                        />
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <Label
-                        htmlFor="email"
-                        className="text-zinc-400 text-xs font-bold uppercase tracking-widest ml-1"
-                      >
-                        Email Address
-                      </Label>
-                      <div className="relative">
-                        <Mail
-                          className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-600"
-                          size={18}
-                        />
-                        <Input
-                          id="email"
-                          name="email"
-                          type="email"
-                          placeholder="m@example.com"
-                          required
-                          className="pl-11 bg-zinc-900/50 border-zinc-800 text-white focus:border-primary focus:ring-primary/20 h-14 rounded-xl transition-all hover:border-zinc-700"
-                        />
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <Label
-                        htmlFor="password"
-                        className="text-zinc-400 text-xs font-bold uppercase tracking-widest ml-1"
-                      >
-                        Secure Password
-                      </Label>
-                      <div className="relative">
-                        <Lock
-                          className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-600"
-                          size={18}
-                        />
-                        <Input
-                          id="password"
-                          name="password"
-                          type="password"
-                          required
-                          minLength={8}
-                          className="pl-11 bg-zinc-900/50 border-zinc-800 text-white focus:border-primary focus:ring-primary/20 h-14 rounded-xl transition-all hover:border-zinc-700"
-                        />
-                      </div>
-                      <p className="text-[10px] text-zinc-600 font-medium px-1">
-                        Must be at least 8 characters long
-                      </p>
-                    </div>
-                  </div>
-                </CardContent>
-                <CardFooter className="flex flex-col space-y-6 p-10 pt-2 bg-zinc-950/50">
-                  <Button
-                    type="submit"
-                    disabled={loading}
-                    className="w-full bg-primary hover:bg-primary/90 text-white font-impact text-2xl h-16 rounded-xl transition-all active:scale-[0.98] shadow-lg shadow-primary/20"
+                </Button>
+                <div className="text-sm text-center text-zinc-500 font-medium">
+                  Already a member?{" "}
+                  <Link
+                    href="/sign-in"
+                    className="text-white hover:text-primary transition-colors font-bold ml-1"
                   >
-                    {loading ? (
-                      <Loader2 className="animate-spin" />
-                    ) : (
-                      "JOIN THE CLUB"
-                    )}
-                  </Button>
-                  <div className="text-sm text-center text-zinc-500 font-medium">
-                    Already a member?{" "}
-                    <Link
-                      href="/sign-in"
-                      className="text-white hover:text-primary transition-colors font-bold ml-1"
-                    >
-                      Sign In
-                    </Link>
-                  </div>
-                </CardFooter>
-              </form>
-            )}
+                    Sign In
+                  </Link>
+                </div>
+              </CardFooter>
+            </form>
           </Card>
         </motion.div>
       </main>

@@ -113,8 +113,8 @@ export default function ParentDashboard() {
                 Welcome, <span className="text-primary">{userName}</span>
               </h1>
               <p className="text-zinc-500 max-w-xl text-lg font-light leading-relaxed">
-                Track your player&apos;s progress and upcoming tryout sessions
-                all in one place.
+                Track player registration and upcoming tryout sessions all in
+                one place.
               </p>
             </div>
             <Button
@@ -142,245 +142,151 @@ export default function ParentDashboard() {
           </Badge>
         </div>
 
-        <div className="grid lg:grid-cols-3 gap-8">
-          {/* My Registrations List */}
-          <div className="lg:col-span-2 space-y-4">
-            {loading ? (
-              <div className="space-y-4">
-                {[1, 2].map((i) => (
-                  <div
-                    key={i}
-                    className="h-48 bg-zinc-900 rounded-2xl animate-pulse border border-border"
-                  />
-                ))}
-              </div>
-            ) : registrations.length === 0 ? (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.98 }}
-                animate={{ opacity: 1, scale: 1 }}
-              >
-                <Card className="bg-card border-border border-dashed py-20 text-center rounded-3xl">
-                  <CardContent className="space-y-6">
-                    <div className="bg-zinc-900 w-20 h-20 rounded-full flex items-center justify-center mx-auto text-zinc-700 border border-border">
-                      <AlertCircle size={40} />
-                    </div>
-                    <div className="space-y-2">
-                      <h3 className="text-white text-2xl font-impact uppercase">
-                        No Registrations Yet
-                      </h3>
-                      <p className="text-zinc-500 max-w-xs mx-auto text-lg font-light">
-                        Your journey with Shadow Basketball starts here.
-                        Register your first player today!
-                      </p>
-                    </div>
-                    <Button
-                      size="lg"
-                      className="bg-zinc-800 text-white rounded-xl px-10 font-bold uppercase tracking-widest text-xs"
-                      onClick={() => router.push("/tryouts")}
-                    >
-                      Start Registration
-                    </Button>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ) : (
-              <motion.div
-                variants={containerVariants}
-                initial="hidden"
-                animate="visible"
-                className="space-y-4"
-              >
-                {registrations.map((reg) => (
-                  <motion.div key={reg.id} variants={itemVariants}>
-                    <Card className="bg-card border-border overflow-hidden transition-all rounded-2xl shadow-xl group">
-                      <div className="flex flex-col md:flex-row">
-                        <div className="bg-black/50 p-8 flex flex-col justify-center items-center text-center border-b md:border-b-0 md:border-r border-border md:w-1/3 ">
-                          <div className="bg-primary/10 p-4 rounded-2xl mb-4 border border-primary/20 transition-transform group-hover:scale-110">
-                            <Trophy className="text-primary w-8 h-8" />
-                          </div>
-                          <span className="text-xs text-zinc-500 font-bold uppercase tracking-widest">
-                            Elite Athlete
-                          </span>
-                          <span className="text-3xl font-impact text-white uppercase mt-1 tracking-wider">
-                            {reg.playerName}
-                          </span>
-                          <Badge
-                            variant="outline"
-                            className="mt-3 border-border text-zinc-400 px-4 py-1 uppercase text-[10px] font-bold tracking-tighter"
-                          >
-                            {reg.playerGrade}
-                          </Badge>
-                        </div>
-
-                        <div className="p-8 flex-1 space-y-6 flex flex-col justify-center">
-                          <div className="flex justify-between items-start">
-                            <div className="space-y-1">
-                              <h4 className="text-2xl font-impact text-white uppercase tracking-wider">
-                                {reg.tryout.ageGroup}
-                              </h4>
-                              <p className="text-zinc-500 text-[10px] font-black uppercase tracking-[0.2em]">
-                                OFFICIAL EVALUATION SESSION
-                              </p>
-                            </div>
-                            <div className="text-right hidden sm:block">
-                              <span className="text-[10px] text-zinc-600 uppercase font-black tracking-widest block mb-1">
-                                Status
-                              </span>
-                              <Badge className="bg-primary/10 text-primary border-primary/20 font-bold text-[10px]">
-                                CONFIRMED
-                              </Badge>
-                            </div>
-                          </div>
-
-                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-2">
-                            <div className="space-y-1">
-                              <div className="flex items-center gap-2 text-primary text-[10px] font-black uppercase tracking-widest">
-                                <Calendar size={12} /> The Date
-                              </div>
-                              <p className="text-zinc-300 font-bold text-sm uppercase tracking-tight">
-                                {new Date(reg.tryout.date).toLocaleDateString(
-                                  undefined,
-                                  {
-                                    month: "short",
-                                    day: "numeric",
-                                    year: "numeric",
-                                  },
-                                )}
-                              </p>
-                            </div>
-                            <div className="space-y-1">
-                              <div className="flex items-center gap-2 text-primary text-[10px] font-black uppercase tracking-widest">
-                                <Clock size={12} /> The Time
-                              </div>
-                              <p className="text-zinc-300 font-bold text-sm uppercase tracking-tight">
-                                {reg.tryout.startTime} - {reg.tryout.endTime}
-                              </p>
-                            </div>
-                            <div className="space-y-1">
-                              <div className="flex items-center gap-2 text-primary text-[10px] font-black uppercase tracking-widest">
-                                <MapPin size={12} /> The Arena
-                              </div>
-                              <p className="text-zinc-300 font-bold text-sm line-clamp-1 uppercase tracking-tight">
-                                {reg.tryout.location}
-                              </p>
-                            </div>
-                          </div>
-
-                          {reg.medicalInfo && (
-                            <div className="bg-black/30 p-4 rounded-xl border border-border flex items-start gap-3">
-                              <AlertCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
-                              <p className="text-[11px] text-zinc-500">
-                                <span className="text-zinc-400 font-black mr-1 uppercase">
-                                  MEDICAL NOTE:
-                                </span>{" "}
-                                {reg.medicalInfo}
-                              </p>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </Card>
-                  </motion.div>
-                ))}
-              </motion.div>
-            )}
-          </div>
-
-          {/* Sidebar info */}
-          <div className="space-y-8">
+        {/* My Registrations List */}
+        <div className="lg:col-span-2 space-y-4">
+          {loading ? (
+            <div className="space-y-4">
+              {[1, 2].map((i) => (
+                <div
+                  key={i}
+                  className="h-48 bg-zinc-900 rounded-2xl animate-pulse border border-border"
+                />
+              ))}
+            </div>
+          ) : registrations.length === 0 ? (
             <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.3 }}
+              initial={{ opacity: 0, scale: 0.98 }}
+              animate={{ opacity: 1, scale: 1 }}
             >
-              <Card className="bg-card border-border rounded-3xl overflow-hidden shadow-2xl transition-all">
-                <CardHeader className="bg-black/50 border-b border-border p-6">
-                  <CardTitle className="text-xl font-impact tracking-wider text-white uppercase flex items-center gap-3">
-                    <PlusCircle size={18} className="text-primary" /> Quick
-                    Actions
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="p-4 space-y-2">
+              <Card className="bg-card border-border border-dashed py-20 text-center rounded-3xl">
+                <CardContent className="space-y-6">
+                  <div className="bg-zinc-900 w-20 h-20 rounded-full flex items-center justify-center mx-auto text-zinc-700 border border-border">
+                    <AlertCircle size={40} />
+                  </div>
+                  <div className="space-y-2">
+                    <h3 className="text-white text-2xl font-impact uppercase">
+                      No Registrations Yet
+                    </h3>
+                    <p className="text-zinc-500 max-w-xs mx-auto text-lg font-light">
+                      Your journey with Shadow Basketball starts here. Register
+                      your first player today!
+                    </p>
+                  </div>
                   <Button
-                    variant="ghost"
-                    className="w-full justify-between text-zinc-400  group h-auto py-5 rounded-2xl transition-all"
+                    size="lg"
+                    className="bg-zinc-800 text-white rounded-xl px-10 font-bold uppercase tracking-widest text-xs"
+                    onClick={() => router.push("/tryouts")}
                   >
-                    <div className="flex items-center gap-4">
-                      <div className="p-2.5 bg-zinc-900 rounded-xl duration-300">
-                        <Calendar size={20} className="text-zinc-500 group-" />
-                      </div>
-                      <div className="text-left">
-                        <span className="block font-bold text-sm uppercase tracking-tight">
-                          Full Schedule
-                        </span>
-                        <span className="text-[10px] text-zinc-600 uppercase font-black tracking-tighter">
-                          View all evaluation dates
-                        </span>
-                      </div>
-                    </div>
-                    <ChevronRight size={16} className="text-zinc-700 " />
-                  </Button>
-
-                  <Button
-                    variant="ghost"
-                    className="w-full justify-between text-zinc-400  group h-auto py-5 rounded-2xl transition-all"
-                  >
-                    <div className="flex items-center gap-4">
-                      <div className="p-2.5 bg-zinc-900 rounded-xl duration-300">
-                        <User size={20} className="text-zinc-500 group-" />
-                      </div>
-                      <div className="text-left">
-                        <span className="block font-bold text-sm uppercase tracking-tight">
-                          Contact Coaches
-                        </span>
-                        <span className="text-[10px] text-zinc-600 uppercase font-black tracking-tighter">
-                          Speak with our evaluation staff
-                        </span>
-                      </div>
-                    </div>
-                    <ChevronRight size={16} className="text-zinc-700 " />
+                    Start Registration
                   </Button>
                 </CardContent>
               </Card>
             </motion.div>
-
+          ) : (
             <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.4 }}
+              variants={containerVariants}
+              initial="hidden"
+              animate="visible"
+              className="space-y-4"
             >
-              <Card className="bg-card border-border p-10 rounded-3xl relative overflow-hidden shadow-2xl">
-                {/* Decorative element */}
-                <div className="absolute -right-10 -bottom-10 text-primary/5 font-impact text-9xl pointer-events-none">
-                  SBC
-                </div>
+              {registrations.map((reg) => (
+                <motion.div key={reg.id} variants={itemVariants}>
+                  <Card className="bg-card border-border overflow-hidden transition-all rounded-2xl shadow-xl group py-0">
+                    <div className="flex flex-col md:flex-row">
+                      <div className="bg-black/50 p-8 flex flex-col justify-center items-center text-center border-b md:border-b-0 md:border-r border-border md:w-1/3 ">
+                        <div className="bg-primary/10 p-4 rounded-2xl mb-4 border border-primary/20 transition-transform group-hover:scale-110">
+                          <Trophy className="text-primary w-8 h-8" />
+                        </div>
+                        <span className="text-xs text-zinc-500 font-bold uppercase tracking-widest">
+                          Elite Athlete
+                        </span>
+                        <span className="text-3xl font-impact text-white uppercase mt-1 tracking-wider">
+                          {reg.playerName}
+                        </span>
+                        <Badge
+                          variant="outline"
+                          className="mt-3 border-border text-zinc-400 px-4 py-1 uppercase text-[10px] font-bold tracking-tighter"
+                        >
+                          {reg.playerGrade}
+                        </Badge>
+                      </div>
 
-                <div className="relative z-10 space-y-6">
-                  <h3 className="text-3xl font-impact tracking-widest text-white uppercase leading-none">
-                    Shadow <br />
-                    Legacy
-                  </h3>
-                  <p className="text-zinc-500 text-sm leading-relaxed font-light">
-                    Excellence is not an act, but a habit. We are dedicated to
-                    providing the premier youth basketball experience.
-                  </p>
-                  <div className="pt-4">
-                    <Button
-                      variant="link"
-                      className="text-primary p-0 font-impact text-sm uppercase tracking-[0.2em] flex items-center gap-3 group transition-all"
-                    >
-                      THE JOURNEY{" "}
-                      <History
-                        size={16}
-                        className="group-hover:rotate-180 transition-transform duration-700"
-                      />
-                    </Button>
-                  </div>
-                </div>
-              </Card>
+                      <div className="p-8 flex-1 space-y-6 flex flex-col justify-center">
+                        <div className="flex justify-between items-start">
+                          <div className="space-y-1">
+                            <h4 className="text-2xl font-impact text-white uppercase tracking-wider">
+                              {reg.tryout.ageGroup}
+                            </h4>
+                            <p className="text-zinc-500 text-[10px] font-black uppercase tracking-[0.2em]">
+                              OFFICIAL EVALUATION SESSION
+                            </p>
+                          </div>
+                          <div className="text-right hidden sm:block">
+                            <span className="text-[10px] text-zinc-600 uppercase font-black tracking-widest block mb-1">
+                              Status
+                            </span>
+                            <Badge className="bg-primary/10 text-primary border-primary/20 font-bold text-[10px]">
+                              CONFIRMED
+                            </Badge>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-2">
+                          <div className="space-y-1">
+                            <div className="flex items-center gap-2 text-primary text-[10px] font-black uppercase tracking-widest">
+                              <Calendar size={12} /> The Date
+                            </div>
+                            <p className="text-zinc-300 font-bold text-sm uppercase tracking-tight">
+                              {new Date(reg.tryout.date).toLocaleDateString(
+                                undefined,
+                                {
+                                  month: "short",
+                                  day: "numeric",
+                                  year: "numeric",
+                                },
+                              )}
+                            </p>
+                          </div>
+                          <div className="space-y-1">
+                            <div className="flex items-center gap-2 text-primary text-[10px] font-black uppercase tracking-widest">
+                              <Clock size={12} /> The Time
+                            </div>
+                            <p className="text-zinc-300 font-bold text-sm uppercase tracking-tight">
+                              {reg.tryout.startTime} - {reg.tryout.endTime}
+                            </p>
+                          </div>
+                          <div className="space-y-1">
+                            <div className="flex items-center gap-2 text-primary text-[10px] font-black uppercase tracking-widest">
+                              <MapPin size={12} /> The Arena
+                            </div>
+                            <p className="text-zinc-300 font-bold text-sm line-clamp-1 uppercase tracking-tight">
+                              {reg.tryout.location}
+                            </p>
+                          </div>
+                        </div>
+
+                        {reg.medicalInfo && (
+                          <div className="bg-black/30 p-4 rounded-xl border border-border flex items-start gap-3">
+                            <AlertCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                            <p className="text-[11px] text-zinc-500">
+                              <span className="text-zinc-400 font-black mr-1 uppercase">
+                                MEDICAL NOTE:
+                              </span>{" "}
+                              {reg.medicalInfo}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </Card>
+                </motion.div>
+              ))}
             </motion.div>
-          </div>
+          )}
         </div>
+
+        {/* Sidebar info */}
+        <div className="space-y-8"></div>
       </motion.div>
     </main>
   );

@@ -86,7 +86,7 @@ export default function Home() {
           <div className="absolute inset-0 bg-linear-to-b from-transparent to-black md:bg-linear-to-r md:from-black md:via-black/20 md:to-transparent pointer-events-none"></div>
         </div>
 
-        <div className="max-w-7xl mx-auto px-6 md:px-16 w-full relative z-10 flex items-center order-2 md:order-1">
+        <div className="max-w-7xl lg:max-w-8xl mx-auto px-6 md:px-16 w-full relative z-10 flex items-center order-2 md:order-1">
           <div className="md:w-1/2 py-12 md:pt-32">
             <motion.div
               initial="hidden"
@@ -158,12 +158,6 @@ export default function Home() {
 
       {/* Mission Section - Height Alignment Fix */}
       <section className="py-16  bg-black relative overflow-hidden border-t border-white/5">
-        <div className="absolute top-1/2 left-0 -translate-y-1/2 -translate-x-1/4 select-none pointer-events-none opacity-[0.02] hidden lg:block">
-          <h2 className="font-impact text-[30rem] text-white leading-none">
-            SHADOW
-          </h2>
-        </div>
-
         <div className="max-w-7xl mx-auto px-6 md:px-16 relative z-10">
           <div className="grid lg:grid-cols-12 gap-12 md:gap-20 items-stretch">
             {/* Image Composition */}
@@ -181,7 +175,6 @@ export default function Home() {
                   fill
                   className="object-cover object-top grayscale group-hover:grayscale-0 transition-all duration-1000 scale-105 group-hover:scale-100"
                 />
-                <div className="absolute inset-0 bg-linear-to-t from-black/80 via-transparent to-transparent"></div>
               </div>
 
               <div className="absolute -top-6 -right-6 w-32 h-32 bg-primary/10 rounded-full blur-3xl"></div>

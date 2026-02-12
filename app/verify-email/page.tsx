@@ -105,7 +105,7 @@ export default function VerifyEmailPage() {
                   variant="outline"
                   className="w-full h-14 rounded-xl border-zinc-800 text-zinc-300 hover:bg-zinc-900 hover:text-white font-bold tracking-wider uppercase"
                 >
-                  Return to Sign In
+                  Confirmed email? Sign in here
                 </Button>
                 
                 <div className="text-sm text-zinc-500">
