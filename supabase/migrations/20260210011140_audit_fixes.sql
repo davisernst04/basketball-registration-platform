@@ -69,4 +69,4 @@ CREATE POLICY "Users can update own profile." ON public.profiles
     TO authenticated
     USING (
         (SELECT auth.uid()) = id
-    );
+    );;

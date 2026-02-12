@@ -33,4 +33,4 @@ CREATE POLICY "Allow users to view their own registrations" ON public.registrati
     TO authenticated
     USING (
         (SELECT auth.uid()) = user_id
-    );
+    );;

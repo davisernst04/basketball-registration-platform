@@ -16,7 +16,6 @@ BEGIN
   RETURN new;
 END;
 $$;
-
 -- Ensure RLS allows the trigger to work (SECURITY DEFINER already handles this, but good to ensure columns exist)
 ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS email TEXT;
 ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS role TEXT DEFAULT 'parent' CHECK (role IN ('parent', 'admin'));
