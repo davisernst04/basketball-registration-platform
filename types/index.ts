@@ -35,11 +35,18 @@ export interface Registration {
   userId: string | null;
 }
 
+export type RegistrationStatus = 
+  | 'NEW_USER_CREATED' 
+  | 'EXISTING_USER_FOUND' 
+  | 'PROFILE_UPDATED' 
+  | 'REGISTRATION_SUCCESS';
+
 export interface ServerActionResponse<T = unknown> {
   success: boolean;
   message: string;
   data?: T;
   error?: string;
+  status?: RegistrationStatus;
 }
 
 export interface RegistrationFormData {

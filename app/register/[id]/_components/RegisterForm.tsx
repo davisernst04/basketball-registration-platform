@@ -82,16 +82,26 @@ export default function RegisterForm({
       const result = await createRegistration(formData);
 
       if (result.success) {
+        let description = "We've received your application.";
+        let redirectPath = "/";
+
+        if (result.status === "NEW_USER_CREATED") {
+          description = "Please check your email to set up your account password.";
+          // Keep at home or maybe verify page? Home is fine.
+        } else if (result.status === "EXISTING_USER_FOUND") {
+          description = "We found an existing account. Please log in to view your registration.";
+          redirectPath = "/sign-in";
+        } else if (initialUser) {
+          redirectPath = "/dashboard";
+        }
+
         toast.success(result.message, {
-          description: "We've received your application. Redirecting...",
+          description,
           icon: <CheckCircle2 className="text-primary" />,
+          duration: 5000,
         });
 
-        if (initialUser) {
-          setTimeout(() => router.push("/dashboard"), 2000);
-        } else {
-          router.push("/");
-        }
+        setTimeout(() => router.push(redirectPath), 2000);
       } else {
         toast.error("Registration failed", {
           description:
