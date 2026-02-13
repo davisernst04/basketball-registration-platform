@@ -4,6 +4,7 @@ import { Tryout } from "@/types";
 import { createPublicClient, createClient } from "@/utils/supabase/server";
 import { cacheLife } from "next/cache";
 import TryoutsList from "./_components/TryoutsList";
+import { Suspense } from "react";
 
 async function getTryouts() {
   "use cache";
@@ -39,12 +40,17 @@ async function getTryouts() {
   }));
 }
 
-export default async function TryoutsPage() {
-  const tryouts = await getTryouts();
+async function TryoutsListWrapper({ tryouts }: { tryouts: any[] }) {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
+
+  return <TryoutsList tryouts={tryouts} isAuthenticated={!!user} />;
+}
+
+export default async function TryoutsPage() {
+  const tryouts = await getTryouts();
 
   return (
     <div className="min-h-screen bg-black text-white selection:bg-primary/30 selection:text-white">
@@ -84,10 +90,9 @@ export default async function TryoutsPage() {
               </div>
             </div>
           ) : (
-            <TryoutsList
-              tryouts={tryouts as any}
-              isAuthenticated={!!user}
-            />
+            <Suspense fallback={<TryoutsList tryouts={tryouts as any} isAuthenticated={false} />}>
+              <TryoutsListWrapper tryouts={tryouts as any} />
+            </Suspense>
           )}
         </div>
       </div>
