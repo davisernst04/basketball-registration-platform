@@ -83,6 +83,28 @@ export default function ParentDashboard() {
               reg.userId === user.id || reg.parentEmail === user.email,
           );
           setRegistrations(myRegs);
+
+          // Check for claimed registrations (created before user account)
+          const userCreatedAt = new Date(user.created_at || new Date()).getTime();
+          const claimedCount = myRegs.filter((reg: Registration) => {
+            const regCreatedAt = new Date(reg.createdAt).getTime();
+            // Allow a small buffer (e.g., 5 seconds) for simultaneous creation edge cases
+            return regCreatedAt < userCreatedAt - 5000;
+          }).length;
+
+          if (claimedCount > 0) {
+            const hasSeenToast = localStorage.getItem("shadow_claimed_toast");
+            if (!hasSeenToast) {
+              toast.success(
+                `Welcome to Shadow Basketball! We found ${claimedCount} past registration${claimedCount > 1 ? "s" : ""} and linked them to your account.`,
+                {
+                  duration: 6000,
+                  icon: <Trophy className="text-primary" />,
+                }
+              );
+              localStorage.setItem("shadow_claimed_toast", "true");
+            }
+          }
         }
       } catch (error) {
         console.error("Error loading registrations:", error);

@@ -5,6 +5,7 @@ import ParentDashboard from "./_components/ParentDashboard";
 import { Suspense } from "react";
 import { Loader2 } from "lucide-react";
 import Navbar from "@/components/Navbar";
+import { linkOrphanedRegistrations } from "./link-orphaned";
 
 async function DashboardContent() {
   const supabase = await createClient();
@@ -15,6 +16,9 @@ async function DashboardContent() {
   if (!user) {
     redirect("/sign-in");
   }
+
+  // Self-healing: Ensure any guest registrations with this email are linked to this account
+  await linkOrphanedRegistrations(user.email, user.id);
 
   const { data: profile } = await supabase
     .from("profiles")

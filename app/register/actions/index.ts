@@ -160,13 +160,14 @@ export async function createRegistration(formData: RegistrationFormData): Promis
       // If user is anon (guest), RLS prevents SELECT after insert.
       // So we generate ID manually and don't select.
       const generatedId = randomUUID();
-      const { error: regError } = await supabase
+      const { error: regError, status: regStatus, statusText } = await supabase
         .from("registration")
         .insert({
           ...insertData,
           id: generatedId // Manually provide ID
         });
-        // Note: No .select() here to avoid RLS error for anon users
+        
+      console.log(`[Public Insert] Status: ${regStatus} ${statusText} | Error: ${regError?.message}`);
 
       if (regError) {
         console.error("Registration insert error (public):", regError);

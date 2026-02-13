@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { connection } from "next/server";
-import { createClient } from "@/utils/supabase/server";
+import { createClient, createAdminClient } from "@/utils/supabase/server";
 
 export async function GET() {
   await connection();
@@ -12,14 +12,27 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Get user role
+    // Get user role using standard client (RLS usually allows reading own profile)
     const { data: profile } = await supabase
       .from("profiles")
       .select("role")
       .eq("id", user.id)
       .single();
 
-    let registrationsQuery = supabase
+    // Try to use Admin Client to bypass RLS for fetching registrations
+    // This solves issues where RLS prevents seeing unlinked guest registrations
+    let queryClient = supabase;
+    let isAdminClient = false;
+    try {
+      queryClient = await createAdminClient();
+      isAdminClient = true;
+    } catch (e) {
+      console.warn("Admin client unavailable for fetching registrations, falling back to public client");
+    }
+
+    console.log(`[API] Fetching regs for User: ${user.id} | Email: ${user.email} | Using Admin: ${isAdminClient}`);
+
+    let registrationsQuery = queryClient
       .from("registration")
       .select(`
         *,
@@ -28,11 +41,13 @@ export async function GET() {
       .order("created_at", { ascending: false });
 
     if (profile?.role !== "admin") {
-      // Parents only see their own
-      registrationsQuery = registrationsQuery.or(`user_id.eq.${user.id},parent_email.eq.${user.email}`);
+      // Parents only see their own - use ilike for case-insensitive email match
+      registrationsQuery = registrationsQuery.or(`user_id.eq.${user.id},parent_email.ilike.${user.email}`);
     }
 
     const { data: registrations, error } = await registrationsQuery;
+
+    console.log(`[API] Query Result: ${registrations?.length || 0} rows. Error: ${error?.message}`);
 
     if (error) throw error;
 
