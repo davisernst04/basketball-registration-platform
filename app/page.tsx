@@ -86,7 +86,7 @@ export default function Home() {
           <div className="absolute inset-0 bg-linear-to-b from-transparent to-black md:bg-linear-to-r md:from-black md:via-black/20 md:to-transparent pointer-events-none"></div>
         </div>
 
-        <div className="max-w-7xl lg:max-w-8xl mx-auto px-6 md:px-16 w-full relative z-10 flex items-center order-2 md:order-1">
+        <div className="max-w-8xl  mx-auto px-6 md:px-16 w-full relative z-10 flex items-center order-2 md:order-1">
           <div className="md:w-1/2 py-12 md:pt-32">
             <motion.div
               initial="hidden"
@@ -131,7 +131,7 @@ export default function Home() {
 
       {/* Sponsors Banner */}
       <section className="py-6 bg-zinc-900 border-y border-white/5 relative overflow-hidden">
-        <div className="max-w-7xl mx-auto px-6 md:px-16">
+        <div className="max-w-8xl mx-auto px-6 md:px-16">
           <div className="flex flex-col md:flex-row items-center justify-between gap-8 md:gap-12">
             <div className="shrink-0">
               <span className="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-500 block mb-1">
@@ -158,7 +158,7 @@ export default function Home() {
 
       {/* Mission Section - Height Alignment Fix */}
       <section className="py-16  bg-black relative overflow-hidden border-t border-white/5">
-        <div className="max-w-7xl mx-auto px-6 md:px-16 relative z-10">
+        <div className="max-w-8xl mx-auto px-6 md:px-16 relative z-10">
           <div className="grid lg:grid-cols-12 gap-12 md:gap-20 items-stretch">
             {/* Image Composition */}
             <motion.div
@@ -246,7 +246,7 @@ export default function Home() {
 
       {/* Upcoming Tryouts Section */}
       <section className="py-16 bg-zinc-950/50 border-y border-white/5 relative">
-        <div className="max-w-7xl mx-auto px-6 md:px-16">
+        <div className="max-w-8xl mx-auto px-6 md:px-16">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -366,7 +366,7 @@ export default function Home() {
 
       {/* Process Section */}
       <section className="py-16  bg-black overflow-hidden relative">
-        <div className="max-w-7xl mx-auto px-6 md:px-16">
+        <div className="max-w-8xl mx-auto px-6 md:px-16">
           <div className="max-w-5xl">
             <motion.div
               initial={{ opacity: 0, x: -30 }}
@@ -389,7 +389,7 @@ export default function Home() {
               {[
                 {
                   step: "01",
-                  title: "Create Account (OPTIONAL)",
+                  title: "Create an Account",
                   desc: "Sign up as a parent to manage your players and registrations safely.",
                 },
                 {
@@ -405,7 +405,7 @@ export default function Home() {
                 {
                   step: "04",
                   title: "Compete",
-                  desc: "Bring your player to the gym and let them showcase their talent to our staff.",
+                  desc: "Bring your player to the gym and let them showcase their talent to our coaches.",
                 },
               ].map((item, i) => (
                 <motion.div
@@ -452,7 +452,7 @@ export default function Home() {
           <div className="absolute inset-0 bg-black/90"></div>
         </div>
 
-        <div className="max-w-7xl mx-auto px-6 md:px-16 relative z-10 text-center">
+        <div className="max-w-8xl mx-auto px-6 md:px-16 relative z-10 text-center">
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             whileInView={{ opacity: 1, scale: 1 }}
@@ -477,7 +477,7 @@ export default function Home() {
       </section>
 
       <footer className="border-t border-white/5 bg-black pt-16 md:pt-20 pb-12 relative overflow-hidden">
-        <div className="max-w-7xl mx-auto px-6 md:px-16 relative z-10">
+        <div className="max-w-8xl mx-auto px-6 md:px-16 relative z-10">
           <div className="flex flex-col md:flex-row justify-between items-start gap-16 pb-16 md:pb-20 border-b border-white/5">
             <div className="space-y-8 max-w-sm">
               <Link href="/" className="flex items-center gap-3 group">

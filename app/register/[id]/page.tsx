@@ -1,12 +1,13 @@
 import { createPublicClient } from "@/utils/supabase/server";
 import RegisterForm from "./_components/RegisterForm";
 import { Tryout as DBTryout } from "@/types/database";
-import { Tryout } from "@/types";
+import { Tryout, Profile } from "@/types";
 import Navbar from "@/components/Navbar";
 import { Toaster } from "sonner";
 import { Suspense } from "react";
 import { Loader2 } from "lucide-react";
 import { createClient } from "@/utils/supabase/server";
+import { redirect } from "next/navigation";
 
 async function getTryout(id: string): Promise<Tryout | null> {
   const supabase = createPublicClient();
@@ -30,17 +31,46 @@ async function getTryout(id: string): Promise<Tryout | null> {
   } as Tryout;
 }
 
+async function getProfile(userId: string): Promise<Profile | null> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("*")
+    .eq("id", userId)
+    .single();
+    
+  if (error) {
+    console.error("Error fetching profile:", error);
+    return null;
+  }
+  
+  return {
+    ...data,
+    fullName: data.full_name,
+    avatarUrl: data.avatar_url,
+  } as Profile;
+}
+
 async function RegisterContent({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const tryout = await getTryout(id);
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
+
+  if (!user) {
+    const returnUrl = encodeURIComponent(`/register/${id}`);
+    redirect(`/sign-in?next=${returnUrl}`);
+  }
+
+  const [tryout, profile] = await Promise.all([
+    getTryout(id),
+    getProfile(user.id)
+  ]);
 
   if (!tryout) {
     return (
@@ -58,7 +88,14 @@ async function RegisterContent({
     );
   }
 
-  return <RegisterForm tryout={tryout} initialUser={user} />;
+  // Construct initial user data from profile or auth user as fallback
+  const userData = {
+    email: profile?.email || user.email,
+    fullName: profile?.fullName || user.user_metadata?.full_name,
+    user_metadata: user.user_metadata
+  };
+
+  return <RegisterForm tryout={tryout} initialUser={userData} />;
 }
 
 export default function RegisterPage({
@@ -77,7 +114,7 @@ export default function RegisterPage({
       </Suspense>
       <Toaster position="top-center" richColors />
 
-      <div className="mx-auto px-4 pt-32 pb-4 relative">
+      <div className="max-w-8xl mx-auto px-6 md:px-16 pt-32 pb-4 relative">
         <div className="max-w-6xl mx-auto">
           <Suspense
             fallback={

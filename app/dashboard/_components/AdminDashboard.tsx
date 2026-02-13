@@ -241,7 +241,7 @@ export default function AdminDashboard() {
   );
 
   return (
-    <main className="mx-auto px-6 md:px-16 pt-32 pb-12">
+    <main className="max-w-8xl mx-auto px-6 md:px-16 pt-32 pb-12">
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}

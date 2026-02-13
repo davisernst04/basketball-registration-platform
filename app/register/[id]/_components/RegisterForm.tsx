@@ -21,6 +21,7 @@ import {
   User,
   ShieldCheck,
   Zap,
+  Lock,
 } from "lucide-react";
 import { createRegistration } from "../../actions";
 import { Tryout, RegistrationFormData } from "@/types";
@@ -28,7 +29,8 @@ import { Tryout, RegistrationFormData } from "@/types";
 interface RegisterFormProps {
   tryout: Tryout;
   initialUser: {
-    email?: string;
+    email?: string | null;
+    fullName?: string | null;
     user_metadata?: {
       full_name?: string;
     };
@@ -62,7 +64,7 @@ export default function RegisterForm({
   const [submitting, setSubmitting] = useState(false);
 
   const [formData, setFormData] = useState<RegistrationFormData>({
-    parentName: initialUser?.user_metadata?.full_name || "",
+    parentName: initialUser?.fullName || initialUser?.user_metadata?.full_name || "",
     parentEmail: initialUser?.email || "",
     parentPhone: "",
     playerName: "",
@@ -84,7 +86,6 @@ export default function RegisterForm({
       if (result.success) {
         let status = result.status || (initialUser ? "LOGGED_IN" : "SUCCESS");
         
-        // If the server didn't explicitly return LOGGED_IN but we have a user and it's just SUCCESS, upgrade it
         if (initialUser && status === "REGISTRATION_SUCCESS") {
             status = "LOGGED_IN";
         }
@@ -144,37 +145,33 @@ export default function RegisterForm({
                 <div className="space-y-3">
                   <Label
                     htmlFor="parentName"
-                    className="text-zinc-500 font-bold uppercase text-[10px] tracking-[0.2em] ml-1"
+                    className="text-zinc-500 font-bold uppercase text-[10px] tracking-[0.2em] ml-1 flex items-center gap-1"
                   >
-                    Full Name
+                    Full Name <Lock size={10} className="text-zinc-600" />
                   </Label>
                   <Input
                     id="parentName"
                     required
+                    readOnly
                     value={formData.parentName}
-                    onChange={(e) =>
-                      setFormData({ ...formData, parentName: e.target.value })
-                    }
-                    className="bg-zinc-900/50 border-border text-white focus:border-primary h-14 rounded-2xl transition-all"
+                    className="bg-zinc-900/30 border-zinc-800 text-zinc-400 focus:border-zinc-800 h-14 rounded-2xl transition-all cursor-not-allowed select-none"
                   />
                 </div>
 
                 <div className="space-y-3">
                   <Label
                     htmlFor="parentEmail"
-                    className="text-zinc-500 font-bold uppercase text-[10px] tracking-[0.2em] ml-1"
+                    className="text-zinc-500 font-bold uppercase text-[10px] tracking-[0.2em] ml-1 flex items-center gap-1"
                   >
-                    Email Address
+                    Email Address <Lock size={10} className="text-zinc-600" />
                   </Label>
                   <Input
                     id="parentEmail"
                     type="email"
                     required
+                    readOnly
                     value={formData.parentEmail}
-                    onChange={(e) =>
-                      setFormData({ ...formData, parentEmail: e.target.value })
-                    }
-                    className="bg-zinc-900/50 border-border text-white focus:border-primary h-14 rounded-2xl transition-all"
+                    className="bg-zinc-900/30 border-zinc-800 text-zinc-400 focus:border-zinc-800 h-14 rounded-2xl transition-all cursor-not-allowed select-none"
                   />
                 </div>
 

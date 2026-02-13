@@ -13,17 +13,9 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
+import { Tryout } from "@/types";
 
-interface Tryout {
-  id: string;
-  location: string;
-  date: string | Date;
-  startTime?: string | null;
-  endTime?: string | null;
-  registrationDeadline: string | Date;
-  ageGroup: string;
-  maxCapacity: number | null;
-  notes: string | null;
+interface TryoutWithStats extends Tryout {
   _count?: {
     registrations: number;
   };
@@ -46,8 +38,17 @@ const itemVariants = {
   },
 };
 
-export default function TryoutsList({ tryouts }: { tryouts: Tryout[] }) {
+export default function TryoutsList({ tryouts, isAuthenticated }: { tryouts: TryoutWithStats[], isAuthenticated: boolean }) {
   const router = useRouter();
+
+  const handleRegister = (tryoutId: string) => {
+    if (!isAuthenticated) {
+        const returnUrl = encodeURIComponent(`/register/${tryoutId}`);
+        router.push(`/sign-in?next=${returnUrl}`);
+    } else {
+        router.push(`/register/${tryoutId}`);
+    }
+  }
 
   return (
     <motion.div
@@ -175,7 +176,7 @@ export default function TryoutsList({ tryouts }: { tryouts: Tryout[] }) {
                 </div>
 
                 <Button
-                  onClick={() => router.push("/register/" + tryout.id)}
+                  onClick={() => handleRegister(tryout.id)}
                   className="w-full bg-white text-black hover:bg-zinc-200 font-impact text-xl h-16 rounded-xl transition-all duration-300 group-hover:shadow-[0_0_30px_rgba(255,255,255,0.1)]"
                   disabled={
                     tryout.maxCapacity !== null &&
