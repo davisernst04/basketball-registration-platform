@@ -20,8 +20,26 @@ export const viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "Shadow Basketball",
-  description: "Shadow Basketball Basketball Club Offical Website",
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"),
+  title: {
+    default: "Shadow Basketball | Saskatoon Youth Basketball",
+    template: "%s | Shadow Basketball",
+  },
+  description: "Saskatoon's premier youth basketball club, dedicated to developing elite athletes through world-class training and provincial competition.",
+  keywords: ["basketball", "youth basketball", "Saskatoon", "Shadow Basketball", "club basketball", "training", "tryouts", "athletes"],
+  openGraph: {
+    title: "Shadow Basketball | Saskatoon Youth Basketball",
+    description: "Saskatoon's premier youth basketball club, dedicated to developing elite athletes through world-class training.",
+    url: "/",
+    siteName: "Shadow Basketball",
+    locale: "en_CA",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Shadow Basketball | Saskatoon Youth Basketball",
+    description: "Saskatoon's premier youth basketball club, dedicated to developing elite athletes.",
+  },
 };
 
 export default function RootLayout({

@@ -7,11 +7,10 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Mail, CheckCircle2, Loader2, ArrowRight } from "lucide-react";
+import { Mail } from "lucide-react";
 import { motion } from "framer-motion";
 import Navbar from "@/components/Navbar";
 import { createClient } from "@/utils/supabase/client";
@@ -19,22 +18,20 @@ import { toast } from "sonner";
 
 export default function VerifyEmailPage() {
   const router = useRouter();
-  const [resendDisabled, setResendDisabled] = useState(false);
   const [countdown, setCountdown] = useState(0);
   const [email, setEmail] = useState<string | null>(null);
   const supabase = createClient();
 
   useEffect(() => {
-    // Try to get email from local storage or previous navigation state if possible,
-    // otherwise generic message.
     const storedEmail = localStorage.getItem("signupEmail");
-    if (storedEmail) setEmail(storedEmail);
-  }, []);
+    if (storedEmail && email === null) setEmail(storedEmail);
+  }, [email]);
+
+  const resendDisabled = countdown > 0;
 
   const handleResendEmail = async () => {
     if (!email) return;
     
-    setResendDisabled(true);
     setCountdown(60);
 
     const { error } = await supabase.auth.resend({
@@ -44,7 +41,6 @@ export default function VerifyEmailPage() {
 
     if (error) {
       toast.error("Failed to resend email: " + error.message);
-      setResendDisabled(false);
       setCountdown(0);
     } else {
       toast.success("Verification email resent!");
@@ -55,8 +51,6 @@ export default function VerifyEmailPage() {
     if (countdown > 0) {
       const timer = setTimeout(() => setCountdown(countdown - 1), 1000);
       return () => clearTimeout(timer);
-    } else {
-      setResendDisabled(false);
     }
   }, [countdown]);
 
@@ -84,7 +78,7 @@ export default function VerifyEmailPage() {
                 Verify Your Email
               </CardTitle>
               <CardDescription className="text-zinc-500 text-center font-medium tracking-wide">
-                We've sent a verification link to your email address.
+                We&apos;ve sent a verification link to your email address.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6 p-10 pt-8 text-center">
@@ -109,7 +103,7 @@ export default function VerifyEmailPage() {
                 </Button>
                 
                 <div className="text-sm text-zinc-500">
-                  Didn't receive the email?
+                  Didn&apos;t receive the email?
                   <Button
                     variant="link"
                     disabled={resendDisabled || !email}

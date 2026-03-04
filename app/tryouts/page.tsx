@@ -5,6 +5,12 @@ import { createPublicClient, createClient } from "@/utils/supabase/server";
 import { cacheLife } from "next/cache";
 import TryoutsList from "./_components/TryoutsList";
 import { Suspense } from "react";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Upcoming Tryouts",
+  description: "View the schedule and register for upcoming Shadow Basketball club tryouts.",
+};
 
 async function getTryouts() {
   "use cache";
