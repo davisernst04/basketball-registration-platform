@@ -1,129 +1,125 @@
-# Shadow Basketball - Tryout Registration Platform
+# Shadow Basketball Registration Platform
 
-A youth basketball team registration platform for Shadow Basketball, featuring a red and black themed design. This application allows parents to register their children for tryouts and provides coaches with administrative tools to manage tryout sessions and view registrations.
+Registration platform for Shadow Basketball tryouts. The application provides a public registration flow for families and an administrative dashboard for managing tryout sessions and registrations.
+
+## Overview
+
+The project is built to handle the core workflow around basketball tryouts:
+
+- publish upcoming tryout sessions
+- collect player registrations from parents or guardians
+- manage registrations through an internal dashboard
+- support account-based access for staff and families
+
+## Stack
+
+- Next.js 16
+- React 19
+- TypeScript
+- Tailwind CSS
+- shadcn/ui
+- Supabase
 
 ## Features
 
-### For Parents
-- **Beautiful Landing Page**: Shadow Basketball branded landing page with team colors (red and black)
-- **Tryout Schedule**: View all available tryout sessions with dates, times, and locations
-- **Easy Registration**: Simple form to register children for tryouts including:
-  - Parent/guardian information
-  - Player information (name, age, grade)
-  - Medical information
-  - Emergency contact details
-  - Tryout session selection
+### Public and family-facing
 
-### For Coaches (Admin)
-- **Admin Dashboard**: Comprehensive dashboard to manage all aspects of tryouts
-- **View Registrations**: See all player registrations with complete details
-- **Manage Tryout Sessions**: View all scheduled tryout sessions with registration counts
-- **Create New Tryouts**: Add new tryout sessions with:
-  - Age group categorization
-  - Date and time slots
-  - Location details
-  - Maximum capacity limits
-  - Additional notes
-- **Search Functionality**: Filter registrations by player or parent name/email
+- Landing page aligned with the program brand
+- Public tryout schedule
+- Registration form for player and guardian details
+- Parent account flows for sign-in and account access
 
-## Tech Stack
+### Administrative
 
-- **Frontend**: Next.js 16 with React 19
-- **UI Components**: shadcn/ui with Tailwind CSS 4
-- **Database**: Supabase (PostgreSQL)
-- **Authentication**: Supabase Auth
-- **Theme**: Custom red and black color scheme
+- Dashboard for managing tryout sessions
+- Registration listing and review
+- Session creation and capacity management
+- Search and filtering for registrations
 
 ## Getting Started
 
 ### Prerequisites
-- Node.js (v20 or higher)
-- Supabase account
-- npm or yarn
 
-### Installation
+- Node.js 20 or later
+- npm
+- Supabase project
 
-1. Clone the repository
+### 1. Clone the repository
+
 ```bash
-git clone <repository-url>
+git clone https://github.com/davisernst04/basketball-registration-platform.git
 cd basketball-registration-platform
 ```
 
-2. Install dependencies
+### 2. Install dependencies
+
 ```bash
 npm install
 ```
 
-3. Set up environment variables
-Create a `.env.local` file in the root directory:
-```
+### 3. Configure environment variables
+
+Create a `.env.local` file in the project root:
+
+```env
 NEXT_PUBLIC_SUPABASE_URL="your-supabase-url"
 NEXT_PUBLIC_SUPABASE_ANON_KEY="your-supabase-anon-key"
 SUPABASE_SERVICE_ROLE_KEY="your-supabase-service-role-key"
 ```
 
-4. Push the database schema
-Use the Supabase dashboard or CLI to apply migrations in `supabase/migrations/`.
+### 4. Apply database migrations
 
-5. Run the development server
+Use the Supabase dashboard or CLI to apply the SQL files in `supabase/migrations/`.
+
+### 5. Start the development server
+
 ```bash
 npm run dev
 ```
 
-6. Open [http://localhost:3000](http://localhost:3000) in your browser
+Then open `http://localhost:3000`.
 
-## Pages
+## Routes
 
-- **/** - Landing page with team branding and quick access
-- **/register** - Registration form for parents
-- **/tryouts** - Public tryout schedule
-- **/dashboard** - Admin dashboard for coaches
-- **/parent-dashboard** - Portal for parents to view their registrations
-- **/sign-in** - Authentication
-- **/sign-up** - Account creation
+- `/` - landing page
+- `/register` - registration form
+- `/tryouts` - public tryout schedule
+- `/dashboard` - staff dashboard
+- `/profile` - account profile
+- `/sign-in` - authentication
+- `/sign-up` - account creation
+- `/confirmation` - registration confirmation
 
-## Database Schema
+## Project Structure
 
-Managed directly via Supabase. Refer to `supabase/migrations/` for the SQL definitions.
-
-### profiles
-- User metadata and roles
-
-### tryout
-- Tryout session information
-
-### registration
-- Player registration data
-
-## Customization
-
-### Theme Colors
-The application uses a red and black color scheme matching Shadow Basketball's branding. Colors are defined in `app/globals.css` using CSS custom properties.
-
-### Team Branding
-Update the team name and branding in:
-- `app/page.tsx` - Landing page
-- `app/layout.tsx` - Page metadata
-- Headers across all pages
+```text
+basketball-registration-platform/
+├── app/
+├── components/
+├── lib/
+├── public/
+├── supabase/
+│   └── migrations/
+├── tests/
+├── types/
+└── utils/
+```
 
 ## Development
 
-### Build for Production
 ```bash
 npm run build
 npm start
 ```
 
-### Database Migrations
-Use the Supabase CLI:
-```bash
-supabase migration new <name>
-```
+## Available Scripts
 
-## Support
+- `npm run dev` - start the development server
+- `npm run build` - build for production
+- `npm run start` - run the production build
+- `npm run test` - run tests
+- `npm run lint` - run ESLint
 
-For issues or questions, please contact the Shadow Basketball administration.
+## Notes
 
----
-
-**Shadow Basketball** - *Rise From The Shadows*
+Brand styling and team-specific copy can be adjusted in the app routes and shared components. Database changes are managed through the Supabase migration files included in the repository.
