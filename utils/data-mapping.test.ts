@@ -15,7 +15,7 @@ describe("Data Mapping Utilities", () => {
       notes: "Bring water",
       created_at: "2026-02-06T00:00:00Z",
       updated_at: "2026-02-06T00:00:00Z",
-      registrations: [{ count: 5 }],
+      registration: [{ count: 5 }],
     };
 
     const formatted = formatTryout(dbTryout);

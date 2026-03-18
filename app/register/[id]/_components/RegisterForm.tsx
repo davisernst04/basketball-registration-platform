@@ -247,6 +247,24 @@ export default function RegisterForm({
                   />
                 </div>
 
+                <div className="space-y-3">
+                  <Label
+                    htmlFor="playerGrade"
+                    className="text-zinc-500 font-bold uppercase text-[10px] tracking-[0.2em] ml-1"
+                  >
+                    Grade
+                  </Label>
+                  <Input
+                    id="playerGrade"
+                    placeholder="e.g. 5th, 6th"
+                    value={formData.playerGrade}
+                    onChange={(e) =>
+                      setFormData({ ...formData, playerGrade: e.target.value })
+                    }
+                    className="bg-zinc-900/50 border-border text-white focus:border-primary h-14 rounded-2xl transition-all"
+                  />
+                </div>
+
                 <div className="space-y-3 md:col-span-3">
                   <Label
                     htmlFor="medicalInfo"
