@@ -1,11 +1,7 @@
 import { createPublicClient } from "@/utils/supabase/server";
 import HomeClient from "./_components/HomeClient";
-import { cacheLife } from "next/cache";
 
 async function getFeaturedTryouts() {
-  "use cache";
-  cacheLife("minutes");
-
   const supabase = createPublicClient();
   const { data: tryouts, error } = await supabase
     .from("tryout")

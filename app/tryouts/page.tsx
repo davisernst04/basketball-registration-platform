@@ -2,7 +2,6 @@ import Navbar from "@/components/Navbar";
 import { TryoutWithCount as DBTryout } from "@/types/database";
 import { Tryout } from "@/types";
 import { createPublicClient, createClient } from "@/utils/supabase/server";
-import { cacheLife } from "next/cache";
 import TryoutsList from "./_components/TryoutsList";
 import { Suspense } from "react";
 import { Metadata } from "next";
@@ -13,9 +12,6 @@ export const metadata: Metadata = {
 };
 
 async function getTryouts() {
-  "use cache";
-  cacheLife("minutes");
-
   const supabase = createPublicClient();
   const { data: tryouts, error } = await supabase
     .from("tryout")

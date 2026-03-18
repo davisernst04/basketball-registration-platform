@@ -3,6 +3,9 @@ import localFont from "next/font/local";
 import { Inter } from "next/font/google";
 import "./globals.css";
 
+// Force dynamic rendering for Supabase compatibility
+export const dynamic = "force-dynamic";
+
 const impactFont = localFont({
   src: "./fonts/impact.ttf",
   variable: "--font-impact",
