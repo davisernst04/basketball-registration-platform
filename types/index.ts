@@ -18,6 +18,10 @@ export interface Tryout {
   ageGroup: string;
   maxCapacity: number | null;
   notes: string | null;
+  _count?: {
+    registrations: number;
+    waitlist?: number;
+  };
 }
 
 export interface Registration {
@@ -39,7 +43,8 @@ export type RegistrationStatus =
   | 'NEW_USER_CREATED' 
   | 'EXISTING_USER_FOUND' 
   | 'PROFILE_UPDATED' 
-  | 'REGISTRATION_SUCCESS';
+  | 'REGISTRATION_SUCCESS'
+  | 'WAITLIST_SUCCESS';
 
 export interface ServerActionResponse<T = unknown> {
   success: boolean;
@@ -72,4 +77,25 @@ export interface TryoutFormData {
   ageGroup: string;
   maxCapacity?: string | number;
   notes?: string;
+}
+
+export interface WaitlistEntry {
+  id: string;
+  tryoutId: string;
+  userId: string;
+  playerName: string;
+  playerAge: number;
+  playerGrade: string;
+  parentName: string;
+  parentEmail: string;
+  parentPhone: string;
+  emergencyContact: string;
+  emergencyPhone: string;
+  medicalInfo: string | null;
+  createdAt: string | Date;
+  tryout?: {
+    ageGroup: string;
+    date: string | Date;
+    location: string;
+  } | null;
 }

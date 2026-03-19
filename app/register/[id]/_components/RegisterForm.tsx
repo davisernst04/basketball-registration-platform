@@ -22,12 +22,13 @@ import {
   ShieldCheck,
   Zap,
   Lock,
+  Users,
 } from "lucide-react";
-import { createRegistration } from "../../actions";
+import { createRegistration, joinWaitlist } from "../../actions";
 import { Tryout, RegistrationFormData } from "@/types";
 
 interface RegisterFormProps {
-  tryout: Tryout;
+  tryout: Tryout & { _count?: { registrations: number } };
   initialUser: {
     email?: string | null;
     fullName?: string | null;
@@ -35,6 +36,7 @@ interface RegisterFormProps {
       full_name?: string;
     };
   } | null;
+  isWaitlist?: boolean;
 }
 
 const fadeInUp = {
@@ -59,6 +61,7 @@ const staggerContainer = {
 export default function RegisterForm({
   tryout,
   initialUser,
+  isWaitlist = false,
 }: RegisterFormProps) {
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
@@ -81,7 +84,9 @@ export default function RegisterForm({
     setSubmitting(true);
 
     try {
-      const result = await createRegistration(formData);
+      const result = isWaitlist 
+        ? await joinWaitlist(formData)
+        : await createRegistration(formData);
 
       if (result.success) {
         let status = result.status || (initialUser ? "LOGGED_IN" : "SUCCESS");
@@ -89,10 +94,14 @@ export default function RegisterForm({
         if (initialUser && status === "REGISTRATION_SUCCESS") {
             status = "LOGGED_IN";
         }
+        
+        if (status === "WAITLIST_SUCCESS") {
+          status = "WAITLIST";
+        }
 
         router.push(`/confirmation?status=${status}`);
       } else {
-        toast.error("Registration failed", {
+        toast.error(isWaitlist ? "Waitlist signup failed" : "Registration failed", {
           description:
             result.message || "Please check your information and try again.",
         });
@@ -115,12 +124,31 @@ export default function RegisterForm({
           className="flex justify-center mb-6"
         ></motion.div>
         <CardTitle className="text-5xl md:text-6xl font-impact tracking-wider text-white uppercase leading-none">
-          {tryout.ageGroup} <span className="text-primary">REGISTRATION</span>
+          {tryout.ageGroup} {isWaitlist ? <span className="text-yellow-400">WAITLIST</span> : <span className="text-primary">REGISTRATION</span>}
         </CardTitle>
         <CardDescription className="text-zinc-500 mt-4 text-xl font-light">
-          Registering for tryout session at {tryout.location} on{" "}
-          {new Date(tryout.date).toLocaleDateString()}
+          {isWaitlist ? (
+            <span className="flex items-center gap-2">
+              <Users className="text-yellow-400" size={18} />
+              This session is full. Join the waitlist for {tryout.location} on{" "}
+              {new Date(tryout.date).toLocaleDateString()}
+            </span>
+          ) : (
+            <>Registering for tryout session at {tryout.location} on{" "}
+            {new Date(tryout.date).toLocaleDateString()}</>
+          )}
         </CardDescription>
+        {isWaitlist && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="mt-4 p-4 bg-yellow-500/10 border border-yellow-500/20 rounded-xl"
+          >
+            <p className="text-yellow-300 text-sm">
+              If a spot opens up, you'll be contacted in the order you joined the waitlist.
+            </p>
+          </motion.div>
+        )}
       </CardHeader>
 
       <CardContent className="md:px-16">
@@ -134,9 +162,9 @@ export default function RegisterForm({
             {/* Section 1: Parent */}
             <motion.div variants={fadeInUp} className="space-y-8">
               <div className="flex items-center gap-6">
-                <div className="bg-primary w-1.5 h-10 rounded-full "></div>
+                <div className={`w-1.5 h-10 rounded-full ${isWaitlist ? 'bg-yellow-400' : 'bg-primary'}`}></div>
                 <h3 className="text-2xl font-impact text-white uppercase tracking-wider flex items-center gap-3">
-                  <User className="text-primary" size={20} />
+                  <User className={isWaitlist ? "text-yellow-400" : "text-primary"} size={20} />
                   Guardian Profile
                 </h3>
               </div>
@@ -200,9 +228,9 @@ export default function RegisterForm({
             {/* Section 2: Player */}
             <motion.div variants={fadeInUp} className="space-y-8">
               <div className="flex items-center gap-6">
-                <div className="bg-primary w-1.5 h-10 rounded-full "></div>
+                <div className={`w-1.5 h-10 rounded-full ${isWaitlist ? 'bg-yellow-400' : 'bg-primary'}`}></div>
                 <h3 className="text-2xl font-impact text-white uppercase tracking-wider flex items-center gap-3">
-                  <Zap className="text-primary" size={20} />
+                  <Zap className={isWaitlist ? "text-yellow-400" : "text-primary"} size={20} />
                   Athlete Information
                 </h3>
               </div>
@@ -288,9 +316,9 @@ export default function RegisterForm({
             {/* Section 3: Emergency */}
             <motion.div variants={fadeInUp} className="space-y-8">
               <div className="flex items-center gap-6">
-                <div className="bg-primary w-1.5 h-10 rounded-full "></div>
+                <div className={`w-1.5 h-10 rounded-full ${isWaitlist ? 'bg-yellow-400' : 'bg-primary'}`}></div>
                 <h3 className="text-2xl font-impact text-white uppercase tracking-wider flex items-center gap-3">
-                  <ShieldCheck className="text-primary" size={20} />
+                  <ShieldCheck className={isWaitlist ? "text-yellow-400" : "text-primary"} size={20} />
                   Emergency Contact
                 </h3>
               </div>
@@ -348,11 +376,19 @@ export default function RegisterForm({
               <Button
                 type="submit"
                 disabled={submitting}
-                className="w-full bg-primary  text-white font-impact text-xl md:text-3xl h-auto py-6 rounded-2xl group transition-all duration-200 whitespace-normal"
+                className={`w-full font-impact text-xl md:text-3xl h-auto py-6 rounded-2xl group transition-all duration-200 whitespace-normal ${
+                  isWaitlist 
+                    ? 'bg-yellow-500 text-black hover:bg-yellow-400' 
+                    : 'bg-primary text-white'
+                }`}
               >
                 {submitting ? (
                   <div className="flex items-center gap-4 uppercase tracking-tighter">
                     <Loader2 className="animate-spin" size={32} /> SUBMITTING...
+                  </div>
+                ) : isWaitlist ? (
+                  <div className="flex items-center gap-4">
+                    JOIN WAITLIST <Users />
                   </div>
                 ) : (
                   <div className="flex items-center gap-4">

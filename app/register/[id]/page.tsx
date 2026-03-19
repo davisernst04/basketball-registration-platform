@@ -13,7 +13,10 @@ async function getTryout(id: string): Promise<Tryout | null> {
   const supabase = createPublicClient();
   const { data, error } = await supabase
     .from("tryout")
-    .select("*")
+    .select(`
+      *,
+      registration(count)
+    `)
     .eq("id", id)
     .single();
 
@@ -28,7 +31,10 @@ async function getTryout(id: string): Promise<Tryout | null> {
     ageGroup: tryout.age_group,
     maxCapacity: tryout.max_capacity,
     date: tryout.date,
-  } as Tryout;
+    _count: {
+      registrations: data.registration?.[0]?.count || 0,
+    },
+  } as Tryout & { _count: { registrations: number } };
 }
 
 async function getProfile(userId: string): Promise<Profile | null> {
@@ -53,10 +59,13 @@ async function getProfile(userId: string): Promise<Profile | null> {
 
 async function RegisterContent({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ waitlist?: string }>;
 }) {
   const { id } = await params;
+  const { waitlist } = await searchParams;
   const supabase = await createClient();
   const {
     data: { user },
@@ -95,13 +104,19 @@ async function RegisterContent({
     user_metadata: user.user_metadata
   };
 
-  return <RegisterForm tryout={tryout} initialUser={userData} />;
+  // Determine if this is a waitlist registration
+  const isWaitlist = waitlist === 'true' || 
+    (tryout.maxCapacity !== null && (tryout._count?.registrations ?? 0) >= tryout.maxCapacity);
+
+  return <RegisterForm tryout={tryout} initialUser={userData} isWaitlist={isWaitlist} />;
 }
 
 export default function RegisterPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ waitlist?: string }>;
 }) {
   return (
     <div className="min-h-screen bg-black">
@@ -126,7 +141,7 @@ export default function RegisterPage({
               </div>
             }
           >
-            <RegisterContent params={params} />
+            <RegisterContent params={params} searchParams={searchParams} />
           </Suspense>
         </div>
       </div>

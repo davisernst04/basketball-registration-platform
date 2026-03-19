@@ -156,3 +156,115 @@ function mapRegistration(reg: any): Registration {
     userId: reg.user_id,
   };
 }
+
+// Join waitlist for full tryouts
+export async function joinWaitlist(formData: RegistrationFormData): Promise<ServerActionResponse> {
+  console.log("Adding to waitlist for tryout:", formData.tryoutId);
+  try {
+    const validatedFields = registrationSchema.safeParse(formData);
+
+    if (!validatedFields.success) {
+      return {
+        success: false,
+        message: "Validation failed",
+        error: validatedFields.error.issues.map(e => e.message).join(", ")
+      };
+    }
+
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+      return { success: false, message: "You must be signed in to join the waitlist." };
+    }
+
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("full_name, email")
+      .eq("id", user.id)
+      .single();
+
+    const trustedParentName = profile?.full_name || user.user_metadata?.full_name || validatedFields.data.parentName;
+    const trustedParentEmail = profile?.email || user.email || validatedFields.data.parentEmail;
+
+    const {
+      parentPhone,
+      playerName,
+      playerAge,
+      playerGrade,
+      medicalInfo,
+      emergencyContact,
+      emergencyPhone,
+      tryoutId,
+    } = validatedFields.data;
+
+    // Check if already on waitlist
+    const { data: existingWaitlist } = await supabase
+      .from("waitlist")
+      .select("id")
+      .eq("tryout_id", tryoutId)
+      .eq("user_id", user.id)
+      .single();
+
+    if (existingWaitlist) {
+      return {
+        success: true,
+        message: "You are already on the waitlist for this tryout session.",
+        status: 'WAITLIST_SUCCESS'
+      };
+    }
+
+    // Check if already registered
+    const { data: existingReg } = await supabase
+      .from("registration")
+      .select("id")
+      .eq("tryout_id", tryoutId)
+      .eq("user_id", user.id)
+      .single();
+
+    if (existingReg) {
+      return {
+        success: false,
+        message: "You are already registered for this tryout session."
+      };
+    }
+
+    const insertData = {
+      tryout_id: tryoutId,
+      user_id: user.id,
+      player_name: playerName,
+      player_age: parseInt(playerAge.toString()),
+      player_grade: playerGrade,
+      parent_name: trustedParentName,
+      parent_email: trustedParentEmail,
+      parent_phone: parentPhone,
+      emergency_contact: emergencyContact,
+      emergency_phone: emergencyPhone,
+      medical_info: medicalInfo || null,
+    };
+
+    const { error } = await supabase
+      .from("waitlist")
+      .insert(insertData);
+
+    if (error) {
+      console.error("Waitlist insert error:", error);
+      throw error;
+    }
+
+    revalidatePath("/dashboard");
+
+    return {
+      success: true,
+      message: "You've been added to the waitlist! We'll contact you if a spot opens up.",
+      status: 'WAITLIST_SUCCESS'
+    };
+  } catch (error) {
+    console.error("Error joining waitlist:", error);
+    return {
+      success: false,
+      message: "Failed to join waitlist",
+      error: error instanceof Error ? error.message : "Unknown error"
+    };
+  }
+}
