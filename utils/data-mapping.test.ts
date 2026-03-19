@@ -10,6 +10,7 @@ describe("Data Mapping Utilities", () => {
       date: "2026-02-06T00:00:00Z",
       start_time: "10:00",
       end_time: "12:00",
+      registration_deadline: "2026-02-05T00:00:00Z",
       age_group: "U12",
       max_capacity: 20,
       notes: "Bring water",
@@ -48,6 +49,7 @@ describe("Data Mapping Utilities", () => {
         location: "Gym",
         start_time: "10:00",
         end_time: "12:00",
+        registration_deadline: "2026-02-05T00:00:00Z",
       },
     };
 

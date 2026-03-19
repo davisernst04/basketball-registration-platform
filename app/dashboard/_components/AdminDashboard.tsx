@@ -27,7 +27,13 @@ import {
   ArrowLeft,
   User as UserIcon,
   AlertCircle,
+  Download,
 } from "lucide-react";
+import {
+  generateRegistrationsCSV,
+  downloadCSV,
+  formatDateString,
+} from "@/lib/export-csv";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { createTryout, updateTryout, deleteTryout } from "../actions";
@@ -229,6 +235,29 @@ export default function AdminDashboard() {
       notes: "",
     });
     setActiveTab("schedule");
+  };
+
+  const handleExportCSV = () => {
+    const dataToExport = filteredRegistrations.map((reg) => ({
+      playerName: reg.playerName,
+      playerAge: reg.playerAge,
+      playerGrade: reg.playerGrade || "",
+      parentName: reg.parentName,
+      parentEmail: reg.parentEmail,
+      parentPhone: reg.parentPhone,
+      emergencyContact: reg.emergencyContact,
+      emergencyPhone: reg.emergencyPhone,
+      medicalInfo: reg.medicalInfo,
+      tryoutAgeGroup: selectedTryout?.ageGroup || "",
+      tryoutDate: formatDateString(selectedTryout?.date || ""),
+      tryoutLocation: selectedTryout?.location || "",
+      registeredAt: formatDateString(reg.createdAt),
+    }));
+
+    const csv = generateRegistrationsCSV(dataToExport);
+    const filename = `${selectedTryout?.ageGroup || "roster"}_${formatDateString(selectedTryout?.date || "")}_registrations.csv`.toLowerCase().replace(/\s+/g, "_");
+    downloadCSV(csv, filename);
+    toast.success(`Exported ${dataToExport.length} registration${dataToExport.length !== 1 ? "s" : ""}`);
   };
 
   const selectedTryout = tryouts.find((t) => t.id === selectedTryoutId);
@@ -502,6 +531,15 @@ export default function AdminDashboard() {
                     className="bg-card border-border pl-10 focus:border-primary h-10 w-full rounded-full"
                   />
                 </div>
+
+                <Button
+                  onClick={handleExportCSV}
+                  disabled={filteredRegistrations.length === 0}
+                  className="bg-primary text-white font-bold h-10 px-6 rounded-full text-xs uppercase tracking-widest transition-all disabled:opacity-50"
+                >
+                  <Download size={14} className="mr-2" />
+                  Export CSV
+                </Button>
               </div>
 
               {loading ? (
